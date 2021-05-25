@@ -1,0 +1,67 @@
+version: '2.3'
+
+services:
+  apache:
+    image: oracolo/apache
+    mem_limit: 200MB
+    ports:
+     - 80:80
+    networks:
+      - vehiclesstack
+  proxy:
+    image: oracolo/proxy
+    mem_limit: 300MB
+    ports:
+    - 8080:8080
+    environment:
+      - REDIS_DB_HOST=redis
+      - REDIS_DB_PORT=6379
+      - KEYSTORE_FILE_NAME=keystore.jks
+    depends_on:
+      - redis
+      - apache
+    networks:
+      - vehiclesstack
+  redis:
+    mem_limit: 100MB
+    image: redis
+    ports:
+    - 6380:6379
+    networks:
+      - vehiclesstack
+  mysql:
+    image: mysql
+    mem_limit: 1GB
+    ports:
+    - 3300:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret-pw
+      - MYSQL_USER=vehicles
+      - MYSQL_PASSWORD=vehicles
+      - MYSQL_DATABASE=vehiclesdb
+    volumes:
+    - /var/docker/data/findmycar/vehicles:/etc/mysql/conf.d
+    networks:
+    - vehiclesstack
+  tracks:
+    mem_limit: 200MB
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_DATABASE=vehiclesdb
+      - MYSQL_PORT=3306
+      - PROXY_HOST=apache
+      - HOST=tracks
+      - ROOT=/tracks
+      - PORT=8080
+    build:  .
+    ports:
+    - 8083:8080
+    networks:
+      - vehiclesstack
+    depends_on:
+      - proxy
+      - mysql
+
+
+networks:
+  vehiclesstack:
