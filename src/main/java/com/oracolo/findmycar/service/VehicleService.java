@@ -2,7 +2,6 @@ package com.oracolo.findmycar.service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -11,19 +10,22 @@ import javax.transaction.Transactional;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.oracolo.findmycar.dao.VehicleDao;
 import com.oracolo.findmycar.entities.Vehicle;
 
 @ApplicationScoped
 public class VehicleService {
-	private Logger logger = Logger.getLogger(this.getClass().getSimpleName());
+	private final Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
 	@Inject
 	VehicleDao vehicleDao;
 
 	@PostConstruct
 	void init(){
-		logger.info("Started!");
+		logger.info("Vehicle service started");
 	}
 
 	@Transactional

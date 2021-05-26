@@ -9,14 +9,14 @@ services:
     networks:
       - vehiclesstack
   proxy:
-    image: oracolo/proxy
-    mem_limit: 300MB
+    image: oracolo/proxy:quarkus
+    mem_limit: 100MB
     ports:
     - 8080:8080
     environment:
       - REDIS_DB_HOST=redis
       - REDIS_DB_PORT=6379
-      - KEYSTORE_FILE_NAME=keystore.jks
+      - HEALTHCHECK=true
     depends_on:
       - redis
       - apache
@@ -44,7 +44,7 @@ services:
     networks:
     - vehiclesstack
   tracks:
-    mem_limit: 200MB
+    mem_limit: 100MB
     environment:
       - MYSQL_HOST=mysql
       - MYSQL_DATABASE=vehiclesdb
@@ -53,6 +53,7 @@ services:
       - HOST=tracks
       - ROOT=/tracks
       - PORT=8080
+      - PROXY_BASE_PATH=proxy/api/v1
     build:  .
     ports:
     - 8083:8080
