@@ -16,6 +16,9 @@ public class NewVehicleDto {
     @NotNull
     public String vehicleName;
 
+    @NotNull
+    public Boolean isFavorite;
+
 
 
 

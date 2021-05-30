@@ -7,7 +7,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import com.oracolo.findmycar.dao.VehicleDao;
 import com.oracolo.findmycar.entities.Vehicle;
+import com.oracolo.findmycar.entities.VehicleAssociation;
 
 @ApplicationScoped
 public class VehicleService {
@@ -23,28 +24,44 @@ public class VehicleService {
 	@Inject
 	VehicleDao vehicleDao;
 
+	@Inject
+	VehicleAssociationService vehicleAssociationService;
+
 	@PostConstruct
-	void init(){
+	void init() {
 		logger.info("Vehicle service started");
 	}
 
 	@Transactional
-	public void createVehicle(Vehicle vehicle) {
+	public void createVehicle(Vehicle vehicle, boolean isFavorite) {
 		Optional<Vehicle> vehicleOptional = vehicleDao.getVehicleByBleHardware(vehicle.getBleHardwareMac());
 		if (vehicleOptional.isPresent())
-			throw new BadRequestException("Vehicle with same bleHardware is already present");
+			throw new ForbiddenException("Cannot create a new vehicle with same ble hardware " + vehicle.getBleHardwareMac());
+
 
 		vehicleDao.insert(vehicle);
+
+		VehicleAssociation vehicleAssociation = new VehicleAssociation();
+		if (isFavorite) {
+			vehicleAssociationService.setVehicleAssociationAsFalse(vehicle.getOwner());
+			vehicleAssociation.setFavorite(true);
+		} else {
+			vehicleAssociation.setFavorite(false);
+		}
+		vehicleAssociation.setVehicle(vehicle);
+		vehicleAssociation.setUserId(vehicle.getOwner());
+		vehicleAssociationService.insertAssociation(vehicleAssociation);
+
+
 	}
 
-	public List<Vehicle> findVehiclesByOwnerId(String ownerId) {
-		return vehicleDao.getVehiclesByOwnerId(ownerId);
+	public Optional<VehicleAssociation> getVehicleById(Integer vehicleId) {
+		throw new NotFoundException("Vehicle with id " + vehicleId + "not found");
 	}
 
-	public Optional<Vehicle> getVehicleById(Integer vehicleId) {
-		throw new NotFoundException("Vehicle with id "+vehicleId+"not found");
+	public List<VehicleAssociation> getVehiclesByOwnerId(String owner) {
+
+		return vehicleAssociationService.getVehicleAssociationByOwner(owner);
 	}
-	public List<Vehicle> getVehiclesByOwnerId(String owner){
-		return vehicleDao.getVehiclesByOwnerId(owner);
-	}
+
 }

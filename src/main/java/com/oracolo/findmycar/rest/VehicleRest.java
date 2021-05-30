@@ -32,7 +32,7 @@ public class VehicleRest {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void createNewVehicle(@Valid @NotNull NewVehicleDto vehicleDto){
-		vehicleService.createVehicle(vehicleConverter.from(vehicleDto));
+		vehicleService.createVehicle(vehicleConverter.from(vehicleDto),vehicleDto.isFavorite);
 	}
 
 	@GET
@@ -43,7 +43,9 @@ public class VehicleRest {
 	}
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<VehicleDto> getVehicles(@QueryParam(value = "owner") String owner){
+	public List<VehicleDto> getVehicles(@QueryParam("owner") String owner){
 		return vehicleConverter.toVehicleDto(vehicleService.getVehiclesByOwnerId(owner));
 	}
+
+
 }

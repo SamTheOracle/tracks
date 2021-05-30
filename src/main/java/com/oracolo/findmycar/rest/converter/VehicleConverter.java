@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 
 import com.oracolo.findmycar.entities.Vehicle;
+import com.oracolo.findmycar.entities.VehicleAssociation;
 import com.oracolo.findmycar.rest.dto.NewVehicleDto;
 import com.oracolo.findmycar.rest.dto.VehicleDto;
 
@@ -22,12 +23,17 @@ public class VehicleConverter {
 		return vehicle;
 	}
 
-	public VehicleDto toVehicleDto(Vehicle vehicle) {
+	public VehicleDto toVehicleDto(VehicleAssociation vehicleAssociation) {
 		VehicleDto vehicleDto = new VehicleDto();
+		Vehicle vehicle = vehicleAssociation.getVehicle();
 		vehicleDto.setOwner(vehicle.getOwner());
+		vehicleDto.setId(vehicle.getId());
+		vehicleDto.setBleHardware(vehicle.getBleHardwareMac());
+		vehicleDto.setName(vehicle.getVehicleName());
+		vehicleDto.setIsFavorite(vehicleAssociation.getFavorite());
 		return vehicleDto;
 	}
-	public List<VehicleDto> toVehicleDto(List<Vehicle> vehicles){
-		return vehicles.stream().map(this::toVehicleDto).collect(Collectors.toUnmodifiableList());
+	public List<VehicleDto> toVehicleDto(List<VehicleAssociation> vehicleAssociations){
+		return vehicleAssociations.stream().map(this::toVehicleDto).collect(Collectors.toUnmodifiableList());
 	}
 }

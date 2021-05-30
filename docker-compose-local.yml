@@ -1,21 +1,35 @@
-version: '2.3'
+version: '3.8'
 
 services:
   apache:
     image: oracolo/apache
-    mem_limit: 200MB
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: '200M'
+        reservations:
+          cpus: '0.25'
+          memory: '80M'
     ports:
      - 80:80
     networks:
       - vehiclesstack
   proxy:
     image: oracolo/proxy:quarkus
-    mem_limit: 100MB
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: '100M'
+        reservations:
+          cpus: '0.25'
+          memory: '80M'
     ports:
     - 8080:8080
     environment:
-      - REDIS_DB_HOST=redis
-      - REDIS_DB_PORT=6379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - HEALTHCHECK=true
     depends_on:
       - redis
@@ -45,11 +59,20 @@ services:
     - vehiclesstack
   tracks:
     mem_limit: 100MB
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: '100M'
+        reservations:
+          cpus: '0.25'
+          memory: '80M'
     environment:
       - MYSQL_HOST=mysql
       - MYSQL_DATABASE=vehiclesdb
       - MYSQL_PORT=3306
       - PROXY_HOST=apache
+      - PROXY_PORT:80
       - HOST=tracks
       - ROOT=/tracks
       - PORT=8080
@@ -57,6 +80,7 @@ services:
     build:  .
     ports:
     - 8083:8080
+    - 5005:5005
     networks:
       - vehiclesstack
     depends_on:

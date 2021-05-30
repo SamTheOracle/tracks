@@ -7,7 +7,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VehicleDto {
-    private String owner, name, id;
+    private String owner, name;
+    private Integer id;
     private Metadata metadata;
     @JsonProperty(value = "isFavorite")
     private Boolean isFavorite;
@@ -42,11 +43,11 @@ public class VehicleDto {
         return this;
     }
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public VehicleDto setId(String id) {
+    public VehicleDto setId(Integer id) {
         this.id = id;
         return this;
     }

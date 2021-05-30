@@ -1,5 +1,5 @@
 create table vehicles (
-    id int not null,
+    id mediumint not null auto_increment,
     vehicle_name varchar(255),
     owner varchar(255),
     ble_hardware_mac varchar(255),
@@ -11,7 +11,7 @@ create table vehicles (
 );
 
 create table positions (
-    id int not null,
+    id mediumint not null auto_increment,
     latitude varchar(255),
     longitude varchar(255),
     chatid int,
@@ -21,25 +21,28 @@ create table positions (
     last_update timestamp,
     version int4 not null default 0,
     is_deleted bit not null default 0,
-    vehicleid int not null,
+    vehicle_id mediumint not null,
     primary key (id)
 );
 
-create table favorite_selections (
-    id int not null,
+create table vehicle_associations (
+    id mediumint not null auto_increment,
     is_favorite bit not null,
     userid varchar(255),
-    vehicleid int not null,
+    vehicle_id mediumint not null,
     insert_date timestamp not null,
     last_update timestamp,
     version int4 not null default 0,
     is_deleted bit not null default 0,
     primary key (id)
 );
-alter table favorite_selections
-    add foreign key (vehicleid)
+
+
+alter table vehicle_associations
+    add foreign key (vehicle_id)
     references vehicles (id);
 
 alter table positions
-    add foreign key (vehicleid)
+    add foreign key (vehicle_id)
     references vehicles (id);
+
