@@ -8,21 +8,16 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.wildfly.common.Assert;
 
 import com.oracolo.findmycar.dao.VehicleDao;
 import com.oracolo.findmycar.entities.Vehicle;
-import com.oracolo.findmycar.rest.dto.NewVehicleDto;
+import com.oracolo.findmycar.entities.VehicleAssociation;
 
-import io.quarkus.test.common.QuarkusTestResource;
-import io.quarkus.test.h2.H2DatabaseTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 
@@ -77,5 +72,45 @@ class VehicleServiceTest {
 		Assertions.assertEquals(OWNER_A,insertedVehicle.getOwner());
 		Assertions.assertEquals(BLE_HARDWARE_A,insertedVehicle.getBleHardwareMac());
 	}
+
+	@Test
+	@DisplayName("Should create vehicle association with favorite false")
+	public void shouldCreateVehicleAssociationWithFavoriteAsFalse(){
+		when(vehicleDao.getVehicleByBleHardware(BLE_HARDWARE_A)).thenReturn(Optional.empty());
+		Vehicle vehicle = new Vehicle();
+		vehicle.setVehicleName(VEHICLE_NAME_A);
+		vehicle.setOwner(OWNER_A);
+		vehicle.setBleHardwareMac(BLE_HARDWARE_A);
+		Assertions.assertDoesNotThrow(()->vehicleService.createVehicle(vehicle,false));
+		ArgumentCaptor<VehicleAssociation> vehicleAssociationArgumentCaptor = ArgumentCaptor.forClass(VehicleAssociation.class);
+		verify(vehicleAssociationService).insertAssociation(vehicleAssociationArgumentCaptor.capture());
+
+		VehicleAssociation vehicleAssociation = vehicleAssociationArgumentCaptor.getValue();
+		Assertions.assertFalse(vehicleAssociation.getFavorite());
+	}
+
+	@Test
+	@DisplayName("Should create vehicle with asssociation as true and update rest to false")
+	public void shouldCreateVehicleWithAssociationAsTrueAndUpdateRestToFalse(){
+		when(vehicleDao.getVehicleByBleHardware(BLE_HARDWARE_A)).thenReturn(Optional.empty());
+		Vehicle vehicle = new Vehicle();
+		vehicle.setVehicleName(VEHICLE_NAME_A);
+		vehicle.setOwner(OWNER_A);
+		vehicle.setBleHardwareMac(BLE_HARDWARE_A);
+		Assertions.assertDoesNotThrow(()->vehicleService.createVehicle(vehicle,true));
+		ArgumentCaptor<VehicleAssociation> vehicleAssociationArgumentCaptor = ArgumentCaptor.forClass(VehicleAssociation.class);
+		verify(vehicleAssociationService).insertAssociation(vehicleAssociationArgumentCaptor.capture());
+
+		VehicleAssociation vehicleAssociation = vehicleAssociationArgumentCaptor.getValue();
+		Assertions.assertTrue(vehicleAssociation.getFavorite());
+		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
+		verify(vehicleAssociationService).setAllOwnerVehicleAssociationsAsNotFavorite(argumentCaptor.capture());
+
+		String owner = argumentCaptor.getValue();
+		Assertions.assertEquals(owner,vehicle.getOwner());
+	}
+
+
+
 
 }

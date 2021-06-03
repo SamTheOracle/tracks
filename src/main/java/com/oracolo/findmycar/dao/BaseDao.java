@@ -26,6 +26,10 @@ public class BaseDao<T> {
 		em.persist(entity);
 	}
 
+	public void delete(T object) {
+		em.remove(object);
+	}
+
 	public void update(T entity){
 		if(entity instanceof MetadataEnable){
 			Metadata metadata = ((MetadataEnable) entity).getMetadata();

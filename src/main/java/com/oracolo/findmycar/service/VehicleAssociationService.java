@@ -1,11 +1,12 @@
 package com.oracolo.findmycar.service;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import com.oracolo.findmycar.dao.VehicleAssociationDao;
 import com.oracolo.findmycar.entities.VehicleAssociation;
@@ -16,6 +17,7 @@ public class VehicleAssociationService {
 	@Inject
 	VehicleAssociationDao vehicleAssociationDao;
 
+	@Transactional
 	public void insertAssociation(VehicleAssociation vehicleAssociation){
 		vehicleAssociationDao.insert(vehicleAssociation);
 	}
@@ -28,7 +30,27 @@ public class VehicleAssociationService {
 		return vehicleAssociationDao.getVehicleAssociationsByOwnerId(owner);
 	}
 
-	public void setVehicleAssociationAsFalse(String owner) {
-		vehicleAssociationDao.setVehicleAssociationFavoriteToFalse(owner);
+	@Transactional
+	public void setAllOwnerVehicleAssociationsAsNotFavorite(String owner) {
+		vehicleAssociationDao.setAllVehicleAssociationsFavoriteToFalse(owner);
+	}
+
+	public Optional<VehicleAssociation> getVehicleAssociationByOwnerAndVehicleId(String owner, Integer id) {
+		return vehicleAssociationDao.getVehicleAssociationsByOwnerIdAndVehicleId(owner,id);
+	}
+
+	@Transactional
+	public void updateVehicleAssociation(VehicleAssociation vehicleAssociationEntity) {
+		vehicleAssociationDao.update(vehicleAssociationEntity);
+	}
+
+	@Transactional
+	public void setAllOwnerVehicleAssociationsAsNotFavoriteExceptVehicleId(String owner, Integer vehicleIdToExclude) {
+		vehicleAssociationDao.setAllVehicleAssociationsFavoriteToFalse(owner,vehicleIdToExclude);
+	}
+
+	@Transactional
+	public void deleteAssociation(VehicleAssociation association) {
+		vehicleAssociationDao.delete(association);
 	}
 }

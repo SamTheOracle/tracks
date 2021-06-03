@@ -9,17 +9,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class VehicleDto {
     private String owner, name;
     private Integer id;
-    private Metadata metadata;
+    private MetadataDto metadata;
     @JsonProperty(value = "isFavorite")
     private Boolean isFavorite;
     private String bleHardware;
     private String bleHumanName;
 
-    public Metadata getMetadata() {
+    public MetadataDto getMetadata() {
         return metadata;
     }
 
-    public VehicleDto setMetadata(Metadata metadata) {
+    public VehicleDto setMetadata(MetadataDto metadata) {
         this.metadata = metadata;
         return this;
     }
