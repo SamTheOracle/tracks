@@ -1,5 +1,8 @@
 package com.oracolo.findmycar.rest.dto;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
+@RegisterForReflection
 public class MetadataDto {
   private String versionId, lastModified;
   private boolean deleted = false;
