@@ -1,4 +1,4 @@
-package com.oracolo.findmycar.service;
+package unit;
 
 import static io.restassured.RestAssured.given;
 import static org.mockito.Mockito.verify;
@@ -18,6 +18,8 @@ import com.oracolo.findmycar.dao.VehicleDao;
 import com.oracolo.findmycar.entities.Vehicle;
 import com.oracolo.findmycar.entities.VehicleAssociation;
 
+import service.VehicleAssociationService;
+import service.VehicleService;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 

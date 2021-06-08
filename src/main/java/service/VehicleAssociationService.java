@@ -1,4 +1,4 @@
-package com.oracolo.findmycar.service;
+package service;
 
 import java.util.ArrayList;
 import java.util.List;

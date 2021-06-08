@@ -17,6 +17,7 @@ create table positions (
     chatid int,
     userid varchar(255),
     timezone varchar(100),
+    user_timestamp varchar(255),
     insert_date timestamp not null,
     last_update timestamp,
     version int4 not null default 0,

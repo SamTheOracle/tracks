@@ -19,14 +19,20 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.oracolo.findmycar.rest.converter.PositionConverter;
 import com.oracolo.findmycar.rest.converter.VehicleConverter;
 import com.oracolo.findmycar.rest.dto.NewVehicleDto;
+import com.oracolo.findmycar.rest.dto.PositionDto;
 import com.oracolo.findmycar.rest.dto.UpdateVehicleDto;
 import com.oracolo.findmycar.rest.dto.VehicleDto;
-import com.oracolo.findmycar.service.VehicleService;
 import com.oracolo.findmycar.validators.NewVehicleValidator;
+import com.oracolo.findmycar.validators.PositionValidator;
 import com.oracolo.findmycar.validators.QueryVehicleValidator;
 import com.oracolo.findmycar.validators.UpdateVehicleValidator;
+
+import service.PositionService;
+import service.VehicleAssociationService;
+import service.VehicleService;
 
 @Path("tracks/vehicles")
 public class VehicleRest {
@@ -34,6 +40,9 @@ public class VehicleRest {
 
 	@Inject
 	VehicleService vehicleService;
+
+	@Inject
+	VehicleAssociationService vehicleAssociationService;
 
 	@Inject
 	VehicleConverter vehicleConverter;
@@ -47,6 +56,15 @@ public class VehicleRest {
 	@Inject
 	QueryVehicleValidator queryVehicleValidator;
 
+	@Inject
+	PositionService positionService;
+
+	@Inject
+	PositionValidator positionValidator;
+
+	@Inject
+	PositionConverter positionConverter;
+
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void createNewVehicle(@NotNull NewVehicleDto vehicleDto) {
@@ -59,14 +77,15 @@ public class VehicleRest {
 	@Path("{vehicleId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public VehicleDto getVehicles(@PathParam("vehicleId") Integer vehicleId) {
-		return vehicleConverter.toVehicleDto(vehicleService.getVehicleById(vehicleId).orElseThrow(NotFoundException::new));
+		return vehicleConverter.toVehicleDto(
+				vehicleService.getVehicleAssociationByVehicleId(vehicleId).orElseThrow(NotFoundException::new));
 	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<VehicleDto> getVehicles(@QueryParam("owner") String owner) {
 		queryVehicleValidator.validateQueryParameters(owner);
-		return vehicleConverter.toVehicleDto(vehicleService.getVehiclesByOwnerId(owner));
+		return vehicleConverter.toVehicleDto(vehicleAssociationService.getVehicleAssociationByOwner(owner));
 	}
 
 	@PUT
@@ -90,4 +109,18 @@ public class VehicleRest {
 
 	}
 
+	@POST
+	@Path("{vehicleId}/positions")
+	@Consumes(value = MediaType.APPLICATION_JSON)
+	public void createPosition(PositionDto positionDto, @PathParam("vehicleId") Integer vehicleId) {
+		positionValidator.validate(positionDto);
+		positionService.createNewPosition(positionConverter.from(positionDto, vehicleId));
+	}
+
+	@GET
+	@Path("{vehicleId}/positions/last")
+	@Produces(value = MediaType.APPLICATION_JSON)
+	public PositionDto getLastPositionForVehicle(@PathParam("vehicleId") Integer vehicleId) {
+		return positionConverter.to(positionService.getLastPositionByVehicleId(vehicleId));
+	}
 }

@@ -1,4 +1,4 @@
-package com.oracolo.findmycar.service;
+package service;
 
 import static io.restassured.RestAssured.given;
 
@@ -17,9 +17,12 @@ import com.oracolo.findmycar.rest.dto.NewVehicleDto;
 import com.oracolo.findmycar.rest.dto.UpdateVehicleDto;
 import com.oracolo.findmycar.rest.dto.VehicleDto;
 
+import commons.BaseVehicleTest;
+import commons.VehicleTestProfile;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.h2.H2DatabaseTestResource;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import io.restassured.response.Response;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.Json;
@@ -28,6 +31,7 @@ import io.vertx.core.json.JsonObject;
 
 @QuarkusTest
 @QuarkusTestResource(H2DatabaseTestResource.class)
+@TestProfile(VehicleTestProfile.class)
 class VehicleIntegrationTest extends BaseVehicleTest {
 
 	private static final String OWNER_A = "owner_a";

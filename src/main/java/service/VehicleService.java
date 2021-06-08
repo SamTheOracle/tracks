@@ -1,4 +1,4 @@
-package com.oracolo.findmycar.service;
+package service;
 
 import java.util.List;
 import java.util.Optional;
@@ -86,12 +86,8 @@ public class VehicleService {
 
 	}
 
-	@Transactional
-	public void updateVehicleName(Integer vehicleId, String name) {
-		vehicleDao.updateVehicleNameGivenId(vehicleId, name);
-	}
 
-	public Optional<VehicleAssociation> getVehicleById(Integer vehicleId) {
+	public Optional<VehicleAssociation> getVehicleAssociationByVehicleId(Integer vehicleId) {
 		Optional<Vehicle> vehicleOptional = vehicleDao.getVehicleById(vehicleId);
 		if (vehicleOptional.isEmpty()) {
 			throw new NotFoundException("Vehicle not found for id " + vehicleId);
@@ -99,11 +95,6 @@ public class VehicleService {
 		Vehicle vehicle = vehicleOptional.get();
 		return vehicleAssociationService.getVehicleAssociationByOwnerAndVehicleId(vehicle.getOwner(), vehicleId);
 
-	}
-
-	public List<VehicleAssociation> getVehiclesByOwnerId(String owner) {
-
-		return vehicleAssociationService.getVehicleAssociationByOwner(owner);
 	}
 
 	@Transactional
@@ -120,5 +111,9 @@ public class VehicleService {
 		logger.debug("Deleting vehicle {}",vehicle);
 		vehicleDao.delete(association.getVehicle());
 
+	}
+
+	public Optional<Vehicle> getVehicleById(Integer vehicleId) {
+		return vehicleDao.getVehicleById(vehicleId);
 	}
 }
