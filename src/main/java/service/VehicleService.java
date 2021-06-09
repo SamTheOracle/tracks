@@ -1,6 +1,5 @@
 package service;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.PostConstruct;
@@ -10,9 +9,13 @@ import javax.transaction.Transactional;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 
+import org.eclipse.microprofile.context.ManagedExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.oracolo.findmycar.mqtt.VehiclePublisher;
+import com.oracolo.findmycar.mqtt.converter.VehicleMessageConverter;
+import com.oracolo.findmycar.mqtt.enums.PersistenceAction;
 import com.oracolo.findmycar.dao.VehicleDao;
 import com.oracolo.findmycar.entities.Vehicle;
 import com.oracolo.findmycar.entities.VehicleAssociation;
@@ -26,6 +29,15 @@ public class VehicleService {
 
 	@Inject
 	VehicleAssociationService vehicleAssociationService;
+
+	@Inject
+	VehiclePublisher vehiclePublisher;
+
+	@Inject
+	VehicleMessageConverter vehicleMessageConverter;
+
+	@Inject
+	ManagedExecutor executor;
 
 	@PostConstruct
 	void init() {
@@ -50,7 +62,7 @@ public class VehicleService {
 		vehicleAssociation.setVehicle(vehicle);
 		vehicleAssociation.setUserId(vehicle.getOwner());
 		vehicleAssociationService.insertAssociation(vehicleAssociation);
-
+		vehiclePublisher.sendMessage(vehicleMessageConverter.from(vehicle, PersistenceAction.CREATE));
 	}
 
 	@Transactional
@@ -83,9 +95,8 @@ public class VehicleService {
 			vehicleAssociationService.setAllOwnerVehicleAssociationsAsNotFavorite(vehicleEntity.getOwner());
 		}
 		vehicleDao.update(vehicleEntity);
-
+		vehiclePublisher.sendMessage(vehicleMessageConverter.from(vehicleEntity, PersistenceAction.UPDATE));
 	}
-
 
 	public Optional<VehicleAssociation> getVehicleAssociationByVehicleId(Integer vehicleId) {
 		Optional<Vehicle> vehicleOptional = vehicleDao.getVehicleById(vehicleId);
@@ -94,7 +105,6 @@ public class VehicleService {
 		}
 		Vehicle vehicle = vehicleOptional.get();
 		return vehicleAssociationService.getVehicleAssociationByOwnerAndVehicleId(vehicle.getOwner(), vehicleId);
-
 	}
 
 	@Transactional
@@ -105,11 +115,12 @@ public class VehicleService {
 			throw new ForbiddenException("There is no association with vehicle " + vehicleId + " for owner " + owner);
 		}
 		VehicleAssociation association = vehicleAssociationOptional.get();
-		logger.debug("Deleting vehicle association {}",association);
+		logger.debug("Deleting vehicle association {}", association);
 		vehicleAssociationService.deleteAssociation(association);
 		Vehicle vehicle = association.getVehicle();
-		logger.debug("Deleting vehicle {}",vehicle);
+		logger.debug("Deleting vehicle {}", vehicle);
 		vehicleDao.delete(association.getVehicle());
+		vehiclePublisher.sendMessage(vehicleMessageConverter.from(vehicle, PersistenceAction.DELETE));
 
 	}
 

@@ -2,6 +2,7 @@ package service;
 
 import static io.restassured.RestAssured.given;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,8 +38,7 @@ class VehicleIntegrationTest extends BaseVehicleTest {
 	private static final String OWNER_A = "owner_a";
 	private static final String BLE_HARDWARE_A = "mac_address_a";
 	private static final String VEHICLE_NAME_A = "vehicle_name_a";
-	private static final String BLE_HARDWARE_B = "mac_address_b";
-	private static final String VEHICLE_NAME_B = "vehicle_name_b";
+
 
 	@Test
 	@DisplayName("Should get vehicle by owner")
@@ -232,6 +232,7 @@ class VehicleIntegrationTest extends BaseVehicleTest {
 	@DisplayName("Should delete vehicle")
 	public void shouldDeleteVehicle() {
 		String owner = "delete_owner";
+		System.out.println(ZonedDateTime.now());
 		NewVehicleDto newVehicleDto = createNewVehicleDto(owner, "delete_ble", false, "vehicle_name_delete");
 		given().body(newVehicleDto).contentType(MediaType.APPLICATION_JSON).post("tracks/vehicles").then().assertThat().statusCode(204);
 
