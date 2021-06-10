@@ -2,6 +2,9 @@ package com.oracolo.findmycar.mqtt.messages;
 
 import com.oracolo.findmycar.mqtt.enums.PersistenceAction;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
+@RegisterForReflection
 public class PositionMessage {
 	public Long chatId;
 	public String timeStamp;

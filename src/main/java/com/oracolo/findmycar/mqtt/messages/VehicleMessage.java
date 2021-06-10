@@ -1,9 +1,10 @@
 package com.oracolo.findmycar.mqtt.messages;
 
-import org.eclipse.microprofile.reactive.messaging.Message;
-
 import com.oracolo.findmycar.mqtt.enums.PersistenceAction;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
+@RegisterForReflection
 public class VehicleMessage{
 
 	public Integer vehicleId;
