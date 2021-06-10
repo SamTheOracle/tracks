@@ -1,4 +1,4 @@
-package service;
+package com.oracolo.findmycar.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +31,11 @@ public class VehicleAssociationService {
 	}
 
 	@Transactional
-	public void setAllOwnerVehicleAssociationsAsNotFavorite(String owner) {
-		vehicleAssociationDao.setAllVehicleAssociationsFavoriteToFalse(owner);
+	public void setAllUserVehicleAssociationsAsNotFavorite(String user) {
+		vehicleAssociationDao.setAllVehicleAssociationsFavoriteToFalse(user);
 	}
 
-	public Optional<VehicleAssociation> getVehicleAssociationByOwnerAndVehicleId(String owner, Integer id) {
+	public Optional<VehicleAssociation> getVehicleAssociationByUserAndVehicleId(String owner, Integer id) {
 		return vehicleAssociationDao.getVehicleAssociationsByOwnerIdAndVehicleId(owner,id);
 	}
 
@@ -45,8 +45,8 @@ public class VehicleAssociationService {
 	}
 
 	@Transactional
-	public void setAllOwnerVehicleAssociationsAsNotFavoriteExceptVehicleId(String owner, Integer vehicleIdToExclude) {
-		vehicleAssociationDao.setAllVehicleAssociationsFavoriteToFalse(owner,vehicleIdToExclude);
+	public void setAllUserVehicleAssociationsAsNotFavoriteExceptVehicleId(String user, Integer vehicleIdToExclude) {
+		vehicleAssociationDao.setAllVehicleAssociationsFavoriteToFalse(user,vehicleIdToExclude);
 	}
 
 	@Transactional

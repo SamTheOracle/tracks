@@ -20,6 +20,9 @@ public class PositionMessageConverter {
 		positionMessage.timezone = position.getTimezone();
 		positionMessage.timeStamp = position.getTimeStamp();
 		positionMessage.userId = position.getUserId();
+		Vehicle vehicle = position.getVehicle();
+		positionMessage.vehicleId = vehicle.getId();
+		positionMessage.vehicleName = vehicle.getVehicleName();
 		return positionMessage;
 	}
 }

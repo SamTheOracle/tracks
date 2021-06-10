@@ -18,8 +18,8 @@ import com.oracolo.findmycar.dao.VehicleDao;
 import com.oracolo.findmycar.entities.Vehicle;
 import com.oracolo.findmycar.entities.VehicleAssociation;
 
-import service.VehicleAssociationService;
-import service.VehicleService;
+import com.oracolo.findmycar.service.VehicleAssociationService;
+import com.oracolo.findmycar.service.VehicleService;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 
@@ -106,7 +106,7 @@ class VehicleServiceTest {
 		VehicleAssociation vehicleAssociation = vehicleAssociationArgumentCaptor.getValue();
 		Assertions.assertTrue(vehicleAssociation.getFavorite());
 		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-		verify(vehicleAssociationService).setAllOwnerVehicleAssociationsAsNotFavorite(argumentCaptor.capture());
+		verify(vehicleAssociationService).setAllUserVehicleAssociationsAsNotFavorite(argumentCaptor.capture());
 
 		String owner = argumentCaptor.getValue();
 		Assertions.assertEquals(owner,vehicle.getOwner());

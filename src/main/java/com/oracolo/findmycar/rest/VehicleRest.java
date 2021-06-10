@@ -30,9 +30,9 @@ import com.oracolo.findmycar.validators.PositionValidator;
 import com.oracolo.findmycar.validators.QueryVehicleValidator;
 import com.oracolo.findmycar.validators.UpdateVehicleValidator;
 
-import service.PositionService;
-import service.VehicleAssociationService;
-import service.VehicleService;
+import com.oracolo.findmycar.service.PositionService;
+import com.oracolo.findmycar.service.VehicleAssociationService;
+import com.oracolo.findmycar.service.VehicleService;
 
 @Path("tracks/vehicles")
 public class VehicleRest {

@@ -1,4 +1,4 @@
-package service;
+package com.oracolo.findmycar.service;
 
 import java.util.Optional;
 
@@ -54,7 +54,7 @@ public class VehicleService {
 
 		VehicleAssociation vehicleAssociation = new VehicleAssociation();
 		if (isFavorite) {
-			vehicleAssociationService.setAllOwnerVehicleAssociationsAsNotFavorite(vehicle.getOwner());
+			vehicleAssociationService.setAllUserVehicleAssociationsAsNotFavorite(vehicle.getOwner());
 			vehicleAssociation.setFavorite(true);
 		} else {
 			vehicleAssociation.setFavorite(false);
@@ -62,7 +62,7 @@ public class VehicleService {
 		vehicleAssociation.setVehicle(vehicle);
 		vehicleAssociation.setUserId(vehicle.getOwner());
 		vehicleAssociationService.insertAssociation(vehicleAssociation);
-		vehiclePublisher.sendMessage(vehicleMessageConverter.from(vehicle, PersistenceAction.CREATE));
+		vehiclePublisher.sendMessage(vehicleMessageConverter.from(vehicleAssociation, PersistenceAction.CREATE));
 	}
 
 	@Transactional
@@ -72,6 +72,7 @@ public class VehicleService {
 			throw new ForbiddenException("Vehicle with id " + vehicleId + " does not exist ");
 		}
 		Vehicle vehicleEntity = vehicleOptional.get();
+
 		String vehicleName = vehicleAssociation.getVehicle().getVehicleName();
 		if (vehicleName != null) {
 			vehicleEntity.setVehicleName(vehicleAssociation.getVehicle().getVehicleName());
@@ -81,21 +82,21 @@ public class VehicleService {
 			//must check if there is an association for the new owner;
 			vehicleEntity.setOwner(owner);
 		}
+		VehicleAssociation vehicleAssociationEntity = vehicleAssociationService.getVehicleAssociationByUserAndVehicleId(
+				vehicleEntity.getOwner(), vehicleEntity.getId()).orElseThrow(() -> new ForbiddenException(
+				"There are no vehicle association for given vehicle id " + vehicleId + " and owner " + vehicleEntity.getOwner()));
 		Boolean isFavorite = vehicleAssociation.getFavorite();
 		if (isFavorite != null && isFavorite) {
-			VehicleAssociation vehicleAssociationEntity = vehicleAssociationService.getVehicleAssociationByOwnerAndVehicleId(
-					vehicleEntity.getOwner(), vehicleEntity.getId()).orElseThrow(() -> new ForbiddenException(
-					"There are no vehicle association for given vehicle id " + vehicleId + " and owner " + vehicleEntity.getOwner()));
 			vehicleAssociationEntity.setFavorite(true);
 			vehicleAssociationService.updateVehicleAssociation(vehicleAssociationEntity);
-			vehicleAssociationService.setAllOwnerVehicleAssociationsAsNotFavoriteExceptVehicleId(vehicleEntity.getOwner(), vehicleId);
+			vehicleAssociationService.setAllUserVehicleAssociationsAsNotFavoriteExceptVehicleId(vehicleEntity.getOwner(), vehicleId);
 
 		}
 		if (isFavorite != null && !isFavorite) {
-			vehicleAssociationService.setAllOwnerVehicleAssociationsAsNotFavorite(vehicleEntity.getOwner());
+			vehicleAssociationService.setAllUserVehicleAssociationsAsNotFavorite(vehicleEntity.getOwner());
 		}
 		vehicleDao.update(vehicleEntity);
-		vehiclePublisher.sendMessage(vehicleMessageConverter.from(vehicleEntity, PersistenceAction.UPDATE));
+		vehiclePublisher.sendMessage(vehicleMessageConverter.from(vehicleAssociationEntity, PersistenceAction.UPDATE));
 	}
 
 	public Optional<VehicleAssociation> getVehicleAssociationByVehicleId(Integer vehicleId) {
@@ -104,12 +105,12 @@ public class VehicleService {
 			throw new NotFoundException("Vehicle not found for id " + vehicleId);
 		}
 		Vehicle vehicle = vehicleOptional.get();
-		return vehicleAssociationService.getVehicleAssociationByOwnerAndVehicleId(vehicle.getOwner(), vehicleId);
+		return vehicleAssociationService.getVehicleAssociationByUserAndVehicleId(vehicle.getOwner(), vehicleId);
 	}
 
 	@Transactional
 	public void deleteVehicle(String owner, Integer vehicleId) {
-		Optional<VehicleAssociation> vehicleAssociationOptional = vehicleAssociationService.getVehicleAssociationByOwnerAndVehicleId(owner,
+		Optional<VehicleAssociation> vehicleAssociationOptional = vehicleAssociationService.getVehicleAssociationByUserAndVehicleId(owner,
 				vehicleId);
 		if (vehicleAssociationOptional.isEmpty()) {
 			throw new ForbiddenException("There is no association with vehicle " + vehicleId + " for owner " + owner);
@@ -120,7 +121,7 @@ public class VehicleService {
 		Vehicle vehicle = association.getVehicle();
 		logger.debug("Deleting vehicle {}", vehicle);
 		vehicleDao.delete(association.getVehicle());
-		vehiclePublisher.sendMessage(vehicleMessageConverter.from(vehicle, PersistenceAction.DELETE));
+		vehiclePublisher.sendMessage(vehicleMessageConverter.from(association, PersistenceAction.DELETE));
 
 	}
 

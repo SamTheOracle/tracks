@@ -68,7 +68,7 @@ class PositionIntegrationTest extends BaseVehicleTest {
 		VehicleDto vehicleDto = getVehicleDto("owner_2", "name_2", "ble_2", false);
 
 		PositionDto positionDto = createDto(123445L, ZonedDateTime.now(ZoneId.of("Europe/Rome")).toString(), "Europe/Rome", "latitude",
-				"longitude", "user");
+				"longitude", "user_klasdp");
 
 		Response response = given().when().with().body(positionDto).contentType(MediaType.APPLICATION_JSON).post(
 				"tracks/vehicles/" + vehicleDto.getId() + "/positions");

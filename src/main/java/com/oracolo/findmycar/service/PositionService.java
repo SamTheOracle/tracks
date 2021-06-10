@@ -1,14 +1,12 @@
-package service;
+package com.oracolo.findmycar.service;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 
 import com.oracolo.findmycar.dao.PositionDao;
 import com.oracolo.findmycar.entities.Position;
-import com.oracolo.findmycar.entities.VehicleAssociation;
 import com.oracolo.findmycar.mqtt.PositionPublisher;
 import com.oracolo.findmycar.mqtt.converter.PositionMessageConverter;
 import com.oracolo.findmycar.mqtt.enums.PersistenceAction;
@@ -29,9 +27,6 @@ public class PositionService {
 
 	@Transactional
 	public void createNewPosition(Position position) {
-		VehicleAssociation vehicleAssociation = vehicleAssociationService.getVehicleAssociationByOwnerAndVehicleId(position.getUserId(),
-				position.getVehicle().getId()).orElseThrow(() -> new ForbiddenException(
-				"User with id " + position.getUserId() + " has no association on vehicle " + position.getVehicle().getId()));
 		positionDao.insert(position);
 		positionPublisher.sendPosition(positionMessageConverter.from(position, PersistenceAction.CREATE));
 	}

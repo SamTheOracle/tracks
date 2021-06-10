@@ -10,11 +10,13 @@ public class PositionMessage {
 	public String longitude;
 	public String latitude;
 	public PersistenceAction action;
+	public Integer vehicleId;
+	public String vehicleName;
 
 	@Override
 	public String toString() {
 		return "PositionMessage{" + "chatId=" + chatId + ", timeStamp='" + timeStamp + '\'' + ", timezone='" + timezone + '\''
 				+ ", userId='" + userId + '\'' + ", longitude='" + longitude + '\'' + ", latitude='" + latitude + '\'' + ", action="
-				+ action + '}';
+				+ action + ", vehicleId=" + vehicleId + ", vehicleName='" + vehicleName + '\'' + '}';
 	}
 }
