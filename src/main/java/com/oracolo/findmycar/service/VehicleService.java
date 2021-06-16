@@ -37,7 +37,7 @@ public class VehicleService {
 	VehicleMessageConverter vehicleMessageConverter;
 
 	@Inject
-	ManagedExecutor executor;
+	PositionService positionService;
 
 	@PostConstruct
 	void init() {
@@ -54,7 +54,7 @@ public class VehicleService {
 
 		VehicleAssociation vehicleAssociation = new VehicleAssociation();
 		if (isFavorite) {
-			vehicleAssociationService.setAllUserVehicleAssociationsAsNotFavorite(vehicle.getOwner());
+
 			vehicleAssociation.setFavorite(true);
 		} else {
 			vehicleAssociation.setFavorite(false);
@@ -109,19 +109,38 @@ public class VehicleService {
 	}
 
 	@Transactional
-	public void deleteVehicle(String owner, Integer vehicleId) {
-		Optional<VehicleAssociation> vehicleAssociationOptional = vehicleAssociationService.getVehicleAssociationByUserAndVehicleId(owner,
+	/**
+	 * Only owner can remove vehicle
+	 */
+	public void deleteVehicle(String user, Integer vehicleId, String newOwner) {
+		Optional<VehicleAssociation> vehicleAssociationOptional = vehicleAssociationService.getVehicleAssociationByUserAndVehicleId(user,
 				vehicleId);
 		if (vehicleAssociationOptional.isEmpty()) {
-			throw new ForbiddenException("There is no association with vehicle " + vehicleId + " for owner " + owner);
+			throw new ForbiddenException("There is no association with vehicle " + vehicleId + " for owner " + user);
 		}
 		VehicleAssociation association = vehicleAssociationOptional.get();
 		logger.debug("Deleting vehicle association {}", association);
 		vehicleAssociationService.deleteAssociation(association);
-		Vehicle vehicle = association.getVehicle();
-		logger.debug("Deleting vehicle {}", vehicle);
-		vehicleDao.delete(association.getVehicle());
+
+		logger.debug("Deleting positions that match userId {} and vehicleId {}",user,vehicleId);
+		positionService.deleteAllPositions(user,vehicleId);
 		vehiclePublisher.sendMessage(vehicleMessageConverter.from(association, PersistenceAction.DELETE));
+
+		Vehicle vehicle = association.getVehicle();
+		if(vehicle.getOwner().equals(user)){
+
+		}
+		if(newOwner==null){
+			logger.debug("Deleting vehicle {}", vehicle);
+			vehicleDao.delete(association.getVehicle());
+		}else {
+			Optional<VehicleAssociation> vehicleAssociationNewOwnerOptional = vehicleAssociationService.getVehicleAssociationByUserAndVehicleId(newOwner,vehicleId);
+			vehicleAssociationNewOwnerOptional.ifPresent(vehicleAssociation -> {
+				vehicle.setOwner(newOwner);
+				vehicleDao.update(vehicle);
+			});
+
+		}
 
 	}
 

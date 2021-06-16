@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Assertions;
 import com.oracolo.findmycar.rest.dto.NewVehicleDto;
 import com.oracolo.findmycar.rest.dto.PositionDto;
 import com.oracolo.findmycar.rest.dto.UpdateVehicleDto;
+import com.oracolo.findmycar.rest.dto.VehicleAssociationDto;
 import com.oracolo.findmycar.rest.dto.VehicleDto;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -61,7 +62,7 @@ public class BaseVehicleTest {
 	 * @param isFavorite
 	 * @return
 	 */
-	protected static VehicleDto getVehicleDto(String owner, String vehicleName, String ble, boolean isFavorite) {
+	protected static VehicleDto createAndGetVehicle(String owner, String vehicleName, String ble, boolean isFavorite) {
 		NewVehicleDto newVehicleDto = new NewVehicleDto();
 		newVehicleDto.owner = owner;
 		newVehicleDto.vehicleName = vehicleName;
@@ -107,5 +108,45 @@ public class BaseVehicleTest {
 		positionDto.userId = userId;
 		positionDto.chatId = chatId;
 		return positionDto;
+	}
+
+//	/**
+//	 *
+//	 * @param owner
+//	 * @param ble
+//	 * @param isFavorite
+//	 * @param vehicleName
+//	 * @return
+//	 */
+//	protected static VehicleDto postNewVehicle(String owner, String ble, boolean isFavorite, String vehicleName){
+//		NewVehicleDto newVehicleDto = createNewVehicleDto(owner, ble, isFavorite, vehicleName);
+//		given().body(newVehicleDto).contentType(MediaType.APPLICATION_JSON).post("tracks/vehicles").then().assertThat().statusCode(204);
+//
+//		Response response = given().when().queryParam("owner", owner).get("tracks/vehicles");
+//		Assertions.assertEquals(200, response.statusCode());
+//
+//		JsonArray vehiclesArray = Assertions.assertDoesNotThrow(() -> new JsonArray(Buffer.buffer(response.body().asByteArray())));
+//		List<VehicleDto> vehicleDtos = vehiclesArray.stream().map(JsonObject::mapFrom).map(
+//				json -> Json.decodeValue(json.encode(), VehicleDto.class)).collect(Collectors.toUnmodifiableList());
+//		Assertions.assertEquals(1, vehicleDtos.size());
+//		VehicleDto responseDto = Assertions.assertDoesNotThrow(() -> vehicleDtos.stream().findFirst().orElseThrow());
+//		return responseDto;
+//	}
+	protected static VehicleDto getVehicleDto(String owner){
+		Response response = given().when().queryParam("owner", owner).get("tracks/vehicles");
+		Assertions.assertEquals(200, response.getStatusCode());
+		JsonArray jsonArray = Assertions.assertDoesNotThrow(() -> new JsonArray(Buffer.buffer(response.body().asByteArray())));
+		Assertions.assertFalse(jsonArray.isEmpty());
+		VehicleDto vehicleDto = Json.decodeValue(jsonArray.getJsonObject(0).encode(), VehicleDto.class);
+		return vehicleDto;
+	}
+	protected static void createNewVehicleAssociation(String userId, Integer vehicleId,boolean isFavorite){
+		VehicleAssociationDto vehicleAssociationDto = new VehicleAssociationDto();
+		vehicleAssociationDto.vehicleId = vehicleId;
+		vehicleAssociationDto.isFavorite=isFavorite;
+		vehicleAssociationDto.userId = userId;
+		given().body(vehicleAssociationDto).contentType(MediaType.APPLICATION_JSON)
+				.post("tracks/vehicles/"+vehicleId+"/associations").then()
+				.assertThat().statusCode(204);
 	}
 }

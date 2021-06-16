@@ -6,7 +6,6 @@ create table vehicles (
     insert_date timestamp not null,
     last_update timestamp,
     version int4 not null default 0,
-    is_deleted bit not null default 0,
     primary key (id)
 );
 
@@ -21,7 +20,6 @@ create table positions (
     insert_date timestamp not null,
     last_update timestamp,
     version int4 not null default 0,
-    is_deleted bit not null default 0,
     vehicle_id mediumint not null,
     primary key (id)
 );
@@ -34,7 +32,6 @@ create table vehicle_associations (
     insert_date timestamp not null,
     last_update timestamp,
     version int4 not null default 0,
-    is_deleted bit not null default 0,
     primary key (id)
 );
 

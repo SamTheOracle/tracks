@@ -16,9 +16,6 @@ public class Metadata {
 	@Column(name = "last_update")
 	private LocalDateTime lastUpdate;
 
-	@Column(name = "is_deleted")
-	private Boolean isDeleted;
-
 	public LocalDateTime getInsertDate() {
 		return insertDate;
 	}
@@ -35,14 +32,6 @@ public class Metadata {
 		this.lastUpdate = lastUpdate;
 	}
 
-	public Boolean getDeleted() {
-		return isDeleted;
-	}
-
-	public void setDeleted(Boolean deleted) {
-		isDeleted = deleted;
-	}
-
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
@@ -50,17 +39,16 @@ public class Metadata {
 		if (!(o instanceof Metadata))
 			return false;
 		Metadata metadata = (Metadata) o;
-		return Objects.equals(insertDate, metadata.insertDate) && Objects.equals(lastUpdate, metadata.lastUpdate) && Objects.equals(
-				isDeleted, metadata.isDeleted);
+		return Objects.equals(insertDate, metadata.insertDate) && Objects.equals(lastUpdate, metadata.lastUpdate);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(insertDate, lastUpdate, isDeleted);
+		return Objects.hash(insertDate, lastUpdate);
 	}
 
 	@Override
 	public String toString() {
-		return "Metadata{" + "insertDate=" + insertDate + ", lastUpdate=" + lastUpdate + ", isDeleted=" + isDeleted + '}';
+		return "Metadata{" + "insertDate=" + insertDate + ", lastUpdate=" + lastUpdate + '}';
 	}
 }

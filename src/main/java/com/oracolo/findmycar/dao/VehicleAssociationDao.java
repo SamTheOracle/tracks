@@ -51,12 +51,12 @@ public class VehicleAssociationDao extends BaseDao<VehicleAssociation>{
 
 	}
 
-	public Optional<VehicleAssociation> getVehicleAssociationsByOwnerIdAndVehicleId(String owner, Integer id) {
+	public Optional<VehicleAssociation> getVehicleAssociationsByUserIdAndVehicleId(String owner, Integer id) {
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<VehicleAssociation> vehicleCriteriaQuery = cb.createQuery(VehicleAssociation.class);
 		Root<VehicleAssociation> root = vehicleCriteriaQuery.from(VehicleAssociation.class);
 		Predicate ownerPredicate = cb.equal(root.get("userId"),owner);
-		Predicate vehicleIdPredicate = cb.equal(root.get("id"),id);
+		Predicate vehicleIdPredicate = cb.equal(root.get("vehicle").get("id"),id);
 		vehicleCriteriaQuery.where(cb.and(ownerPredicate,vehicleIdPredicate));
 		return em.createQuery(vehicleCriteriaQuery).getResultStream().findFirst();
 	}
