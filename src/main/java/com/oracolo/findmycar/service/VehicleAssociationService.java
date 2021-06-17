@@ -25,8 +25,8 @@ public class VehicleAssociationService {
 		vehicleAssociationDao.insert(vehicleAssociation);
 	}
 
-	public List<VehicleAssociation> getFavoriteSelectionsByVehicleId(Integer vehicleId){
-		return new ArrayList<>();
+	public List<VehicleAssociation> getVehicleAssociationsById(Integer vehicleId){
+		return vehicleAssociationDao.getVehicleAssociationsById(vehicleId);
 	}
 
 	public List<VehicleAssociation> getVehicleAssociationByOwner(String owner) {
