@@ -20,18 +20,12 @@ public class BaseDao<T> {
 			MetadataEnable metadataEnable = (MetadataEnable) entity;
 			Metadata metadata = new Metadata();
 			metadata.setInsertDate(LocalDateTime.now());
-			metadata.setDeleted(false);
 			metadataEnable.setMetadata(metadata);
 		}
 		em.persist(entity);
 	}
 
 	public void delete(T entity) {
-		if(entity instanceof MetadataEnable){
-			Metadata metadata = ((MetadataEnable) entity).getMetadata();
-			metadata.setLastUpdate(LocalDateTime.now());
-			metadata.setDeleted(true);
-		}
 		em.remove(entity);
 	}
 

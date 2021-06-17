@@ -19,11 +19,14 @@ public class VehicleAssociationService {
 
 	@Transactional
 	public void insertAssociation(VehicleAssociation vehicleAssociation){
+		if(vehicleAssociation.getFavorite()){
+			setAllUserVehicleAssociationsAsNotFavorite(vehicleAssociation.getUserId());
+		}
 		vehicleAssociationDao.insert(vehicleAssociation);
 	}
 
-	public List<VehicleAssociation> getFavoriteSelectionsByVehicleId(Integer vehicleId){
-		return new ArrayList<>();
+	public List<VehicleAssociation> getVehicleAssociationsById(Integer vehicleId){
+		return vehicleAssociationDao.getVehicleAssociationsById(vehicleId);
 	}
 
 	public List<VehicleAssociation> getVehicleAssociationByOwner(String owner) {
@@ -36,7 +39,7 @@ public class VehicleAssociationService {
 	}
 
 	public Optional<VehicleAssociation> getVehicleAssociationByUserAndVehicleId(String owner, Integer id) {
-		return vehicleAssociationDao.getVehicleAssociationsByOwnerIdAndVehicleId(owner,id);
+		return vehicleAssociationDao.getVehicleAssociationsByUserIdAndVehicleId(owner,id);
 	}
 
 	@Transactional

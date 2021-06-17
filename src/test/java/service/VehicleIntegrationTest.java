@@ -2,6 +2,7 @@ package service;
 
 import static io.restassured.RestAssured.given;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import com.oracolo.findmycar.rest.dto.ErrorDto;
 import com.oracolo.findmycar.rest.dto.NewVehicleDto;
+import com.oracolo.findmycar.rest.dto.PositionDto;
 import com.oracolo.findmycar.rest.dto.UpdateVehicleDto;
 import com.oracolo.findmycar.rest.dto.VehicleDto;
 
@@ -249,5 +251,41 @@ class VehicleIntegrationTest extends BaseVehicleTest {
 
 		given().when().get("tracks/vehicles/"+responseDto.getId()).then().assertThat().statusCode(404);
 	}
+
+	@Test
+	@DisplayName("Should delete all vehicle-related data after delete")
+	void shouldDeleteAllVehicleRelatedData(){
+		String owner = "owner_delete_all_data_ok";
+		VehicleDto vehicleDto = createAndGetVehicle(owner,"vehicle_name","ble_delete_all_ok",false);
+		PositionDto positionDto = new PositionDto();
+		positionDto.userId = owner;
+		positionDto.chatId=1234L;
+		positionDto.timezone="Europe/Rome";
+		positionDto.latitude="lat";
+		positionDto.longitude="long";
+		positionDto.timestamp = ZonedDateTime.now(ZoneId.of(positionDto.timezone)).toString();
+
+		given().when().body(positionDto).contentType(MediaType.APPLICATION_JSON).post("tracks/vehicles/"+vehicleDto.getId()+"/positions").then().assertThat().statusCode(204);
+
+		given().when().queryParam("owner", owner).delete("tracks/vehicles/" + vehicleDto.getId()).then().assertThat().statusCode(204);
+
+		given().when().get("tracks/vehicles/"+vehicleDto.getId()+"/positions/last").then().assertThat().statusCode(404);
+
+	}
+	@Test
+	@DisplayName("Should change owner when change_owner parameter is specified")
+	void shouldChangeOwner(){
+		String owner = "owner_delete_all_data";
+		VehicleDto vehicleDto = createAndGetVehicle(owner,"vehicle_name","ble_delete_all",false);
+		String newOwner = "new_owner_test";
+		createNewVehicleAssociation(newOwner,vehicleDto.getId(),false);
+		given().when().queryParam("owner", owner).queryParam("new_owner",newOwner).delete("tracks/vehicles/" + vehicleDto.getId()).then().assertThat().statusCode(204);
+
+		VehicleDto changedOwnerVehicleDto = getVehicleDto(newOwner);
+		Assertions.assertEquals(newOwner,changedOwnerVehicleDto.getOwner());
+
+
+	}
+
 
 }

@@ -1,24 +1,25 @@
 package com.oracolo.findmycar.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 
-import org.eclipse.microprofile.context.ManagedExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.oracolo.findmycar.mqtt.VehiclePublisher;
-import com.oracolo.findmycar.mqtt.converter.VehicleMessageConverter;
-import com.oracolo.findmycar.mqtt.enums.PersistenceAction;
 import com.oracolo.findmycar.dao.VehicleDao;
 import com.oracolo.findmycar.entities.Vehicle;
 import com.oracolo.findmycar.entities.VehicleAssociation;
+import com.oracolo.findmycar.mqtt.VehiclePublisher;
+import com.oracolo.findmycar.mqtt.converter.VehicleMessageConverter;
+import com.oracolo.findmycar.mqtt.enums.PersistenceAction;
 
 @ApplicationScoped
 public class VehicleService {
@@ -37,7 +38,7 @@ public class VehicleService {
 	VehicleMessageConverter vehicleMessageConverter;
 
 	@Inject
-	ManagedExecutor executor;
+	PositionService positionService;
 
 	@PostConstruct
 	void init() {
@@ -54,7 +55,7 @@ public class VehicleService {
 
 		VehicleAssociation vehicleAssociation = new VehicleAssociation();
 		if (isFavorite) {
-			vehicleAssociationService.setAllUserVehicleAssociationsAsNotFavorite(vehicle.getOwner());
+
 			vehicleAssociation.setFavorite(true);
 		} else {
 			vehicleAssociation.setFavorite(false);
@@ -109,19 +110,41 @@ public class VehicleService {
 	}
 
 	@Transactional
-	public void deleteVehicle(String owner, Integer vehicleId) {
-		Optional<VehicleAssociation> vehicleAssociationOptional = vehicleAssociationService.getVehicleAssociationByUserAndVehicleId(owner,
+	/**
+	 * Only owner can remove vehicle
+	 */ public void deleteVehicle(String user, Integer vehicleId, String newOwner) {
+		Optional<VehicleAssociation> vehicleAssociationOptional = vehicleAssociationService.getVehicleAssociationByUserAndVehicleId(user,
 				vehicleId);
 		if (vehicleAssociationOptional.isEmpty()) {
-			throw new ForbiddenException("There is no association with vehicle " + vehicleId + " for owner " + owner);
+			throw new ForbiddenException("There is no association with vehicle " + vehicleId + " for owner " + user);
 		}
 		VehicleAssociation association = vehicleAssociationOptional.get();
 		logger.debug("Deleting vehicle association {}", association);
 		vehicleAssociationService.deleteAssociation(association);
-		Vehicle vehicle = association.getVehicle();
-		logger.debug("Deleting vehicle {}", vehicle);
-		vehicleDao.delete(association.getVehicle());
+
+		logger.debug("Deleting positions that match userId {} and vehicleId {}", user, vehicleId);
+		positionService.deleteAllPositions(user, vehicleId);
 		vehiclePublisher.sendMessage(vehicleMessageConverter.from(association, PersistenceAction.DELETE));
+
+		Vehicle vehicle = association.getVehicle();
+		if (vehicle.getOwner().equals(user)) {
+			handleOwnerDelete(vehicle, newOwner);
+		}
+
+	}
+
+	private void handleOwnerDelete(Vehicle vehicle, String newOwner) {
+		List<VehicleAssociation> associations = vehicleAssociationService.getVehicleAssociationsById(vehicle.getId());
+		if (associations.isEmpty() && newOwner != null) {
+			throw new BadRequestException("Cannot change new owner. No other association present on vehicle " + vehicle.getId());
+		}
+		if (associations.isEmpty()) {
+			vehicleDao.delete(vehicle);
+			return;
+		}
+		if (newOwner != null) {
+			vehicle.setOwner(newOwner);
+		}
 
 	}
 

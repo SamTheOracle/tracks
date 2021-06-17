@@ -92,27 +92,14 @@ class VehicleServiceTest {
 	}
 
 	@Test
-	@DisplayName("Should create vehicle with asssociation as true and update rest to false")
-	public void shouldCreateVehicleWithAssociationAsTrueAndUpdateRestToFalse(){
-		when(vehicleDao.getVehicleByBleHardware(BLE_HARDWARE_A)).thenReturn(Optional.empty());
-		Vehicle vehicle = new Vehicle();
-		vehicle.setVehicleName(VEHICLE_NAME_A);
-		vehicle.setOwner(OWNER_A);
-		vehicle.setBleHardwareMac(BLE_HARDWARE_A);
-		Assertions.assertDoesNotThrow(()->vehicleService.createVehicle(vehicle,true));
-		ArgumentCaptor<VehicleAssociation> vehicleAssociationArgumentCaptor = ArgumentCaptor.forClass(VehicleAssociation.class);
-		verify(vehicleAssociationService).insertAssociation(vehicleAssociationArgumentCaptor.capture());
+	@DisplayName("If user is also owner should delete association and vehicle if no other association are present")
+	public void deleteWithUserIsOwnerAndNoOtherUsers(){
 
-		VehicleAssociation vehicleAssociation = vehicleAssociationArgumentCaptor.getValue();
-		Assertions.assertTrue(vehicleAssociation.getFavorite());
-		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-		verify(vehicleAssociationService).setAllUserVehicleAssociationsAsNotFavorite(argumentCaptor.capture());
-
-		String owner = argumentCaptor.getValue();
-		Assertions.assertEquals(owner,vehicle.getOwner());
 	}
+	@Test
+	@DisplayName("Should delete association and change owner when owner not null")
+	void deleteWithChangeOwner(){
 
-
-
+	}
 
 }

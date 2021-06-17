@@ -32,7 +32,7 @@ class PositionIntegrationTest extends BaseVehicleTest {
 	@Test
 	@DisplayName("Should post position correctly")
 	void shouldGetVehicleByOwnerTest() {
-		VehicleDto vehicleDto = getVehicleDto("owner", "name", "ble", false);
+		VehicleDto vehicleDto = createAndGetVehicle("owner", "name", "ble", false);
 
 		PositionDto positionDto = createDto(1234512312L, ZonedDateTime.now(ZoneId.of("Europe/Rome")).toString(), "Europe/Rome", "latitude",
 				"longitude", "owner");
@@ -52,7 +52,7 @@ class PositionIntegrationTest extends BaseVehicleTest {
 	@Test
 	@DisplayName("Should throw forbidden with timezone is not the timestamp timezone")
 	void shouldThrowForbiddenWhenTimezoneIsNotTheTimestampTimezone() {
-		VehicleDto vehicleDto = getVehicleDto("owner_1", "name_1", "ble_1", false);
+		VehicleDto vehicleDto = createAndGetVehicle("owner_1", "name_1", "ble_1", false);
 
 		PositionDto positionDto = createDto(1234512312L, ZonedDateTime.now(ZoneId.of("Europe/Rome")).toString(), "Europe/London",
 				"latitude", "longitude", "owner_1");
@@ -65,7 +65,7 @@ class PositionIntegrationTest extends BaseVehicleTest {
 	@Test
 	@DisplayName("Should throw forbidden when user with no association post position")
 	void shouldThrowForbiddenWhenUserWithNoAssociationPostPosition() {
-		VehicleDto vehicleDto = getVehicleDto("owner_2", "name_2", "ble_2", false);
+		VehicleDto vehicleDto = createAndGetVehicle("owner_2", "name_2", "ble_2", false);
 
 		PositionDto positionDto = createDto(123445L, ZonedDateTime.now(ZoneId.of("Europe/Rome")).toString(), "Europe/Rome", "latitude",
 				"longitude", "user_klasdp");
@@ -83,7 +83,7 @@ class PositionIntegrationTest extends BaseVehicleTest {
 	@DisplayName("Should get most recent position")
 	void shouldGetMostRecentLastPosition() {
 		String owner = "owner_3";
-		VehicleDto vehicleDto = getVehicleDto(owner, "name_2", "ble_3", false);
+		VehicleDto vehicleDto = createAndGetVehicle(owner, "name_2", "ble_3", false);
 
 		PositionDto positionDto1 = createDto(123445L, ZonedDateTime.now(ZoneId.of("Europe/Rome")).toString(), "Europe/Rome", "latitude_1",
 				"longitude_2", owner);

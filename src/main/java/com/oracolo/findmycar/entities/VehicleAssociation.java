@@ -25,7 +25,7 @@ public class VehicleAssociation implements MetadataEnable{
 	@Column(name = "is_favorite")
 	private Boolean isFavorite;
 
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
 	private Vehicle vehicle;
 
 	@Version

@@ -35,4 +35,8 @@ public class PositionService {
 		return positionDao.getLastPosition(vehicleId).orElseThrow(
 				() -> new NotFoundException("No position found for vehicle with id " + vehicleId));
 	}
+
+	public void deleteAllPositions(String owner, Integer vehicleId) {
+		positionDao.deleteAllPositionsByOwnerAndVehicleId(owner,vehicleId);
+	}
 }
