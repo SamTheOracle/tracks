@@ -27,7 +27,7 @@ public class VehiclePublisher {
 	Emitter<VehicleMessage> vehicleMessageEmitter;
 
 	public void sendMessage(VehicleMessage message) {
-		logger.info("Sending vehicle message {}", message);
+		logger.debug("Sending vehicle message {}", message);
 		vehicleMessageEmitter.send(Message.of(message));
 	}
 
