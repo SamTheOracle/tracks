@@ -7,7 +7,6 @@ import javax.ws.rs.NotFoundException;
 
 import com.oracolo.findmycar.dao.PositionDao;
 import com.oracolo.findmycar.entities.Position;
-import com.oracolo.findmycar.mqtt.PositionPublisher;
 import com.oracolo.findmycar.mqtt.converter.PositionMessageConverter;
 import com.oracolo.findmycar.mqtt.enums.PersistenceAction;
 
@@ -20,7 +19,7 @@ public class PositionService {
 	PositionDao positionDao;
 
 	@Inject
-	PositionPublisher positionPublisher;
+	MqttClientService mqttClientService;
 
 	@Inject
 	PositionMessageConverter positionMessageConverter;
@@ -28,7 +27,7 @@ public class PositionService {
 	@Transactional
 	public void createNewPosition(Position position) {
 		positionDao.insert(position);
-		positionPublisher.sendPosition(positionMessageConverter.from(position, PersistenceAction.CREATE));
+		mqttClientService.sendPositionMessage(positionMessageConverter.from(position, PersistenceAction.CREATE));
 	}
 
 	public Position getLastPositionByVehicleId(Integer vehicleId) {

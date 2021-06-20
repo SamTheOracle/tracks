@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import com.oracolo.findmycar.dao.VehicleDao;
 import com.oracolo.findmycar.entities.Vehicle;
 import com.oracolo.findmycar.entities.VehicleAssociation;
-import com.oracolo.findmycar.mqtt.VehiclePublisher;
 import com.oracolo.findmycar.mqtt.converter.VehicleMessageConverter;
 import com.oracolo.findmycar.mqtt.enums.PersistenceAction;
 
@@ -32,13 +31,13 @@ public class VehicleService {
 	VehicleAssociationService vehicleAssociationService;
 
 	@Inject
-	VehiclePublisher vehiclePublisher;
-
-	@Inject
 	VehicleMessageConverter vehicleMessageConverter;
 
 	@Inject
 	PositionService positionService;
+
+	@Inject
+	MqttClientService mqttClientService;
 
 	@PostConstruct
 	void init() {
@@ -63,7 +62,7 @@ public class VehicleService {
 		vehicleAssociation.setVehicle(vehicle);
 		vehicleAssociation.setUserId(vehicle.getOwner());
 		vehicleAssociationService.insertAssociation(vehicleAssociation);
-		vehiclePublisher.sendMessage(vehicleMessageConverter.from(vehicleAssociation, PersistenceAction.CREATE));
+		mqttClientService.sendVehicleMessage(vehicleMessageConverter.from(vehicleAssociation,PersistenceAction.CREATE));
 	}
 
 	@Transactional
@@ -97,7 +96,7 @@ public class VehicleService {
 			vehicleAssociationService.setAllUserVehicleAssociationsAsNotFavorite(vehicleEntity.getOwner());
 		}
 		vehicleDao.update(vehicleEntity);
-		vehiclePublisher.sendMessage(vehicleMessageConverter.from(vehicleAssociationEntity, PersistenceAction.UPDATE));
+		mqttClientService.sendVehicleMessage(vehicleMessageConverter.from(vehicleAssociationEntity, PersistenceAction.UPDATE));
 	}
 
 	public Optional<VehicleAssociation> getVehicleAssociationByVehicleId(Integer vehicleId) {
@@ -124,7 +123,7 @@ public class VehicleService {
 
 		logger.debug("Deleting positions that match userId {} and vehicleId {}", user, vehicleId);
 		positionService.deleteAllPositions(user, vehicleId);
-		vehiclePublisher.sendMessage(vehicleMessageConverter.from(association, PersistenceAction.DELETE));
+		mqttClientService.sendVehicleMessage(vehicleMessageConverter.from(association, PersistenceAction.DELETE));
 
 		Vehicle vehicle = association.getVehicle();
 		if (vehicle.getOwner().equals(user)) {
