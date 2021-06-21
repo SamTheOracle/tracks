@@ -1,6 +1,9 @@
 package com.oracolo.findmycar.service;
 
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -45,20 +48,32 @@ public class MqttClientService implements IMqttActionListener, MqttCallbackExten
 	@ConfigProperty(name = "mqtt.client.id")
 	String mqttClientId;
 
+	@ConfigProperty(name = "mqtt.connection.delay")
+	Integer connectionDelay;
+
 	private  MqttAsyncClient mqttClient;
 
 	void init(@Observes StartupEvent event) throws MqttException {
-		String serverURI = mqttProtocol + "://" + mqttHost + ":" + mqttPort;
-		logger.info("Connecting to broker {}.", serverURI);
-
 		MqttConnectOptions connOpts = new MqttConnectOptions();
 		connOpts.setCleanSession(true);
 		connOpts.setAutomaticReconnect(true);
 		connOpts.setKeepAliveInterval(10);
+		connOpts.setConnectionTimeout(60);
+
 		connOpts.setUserName(mqttClientId);
-		mqttClient = new MqttAsyncClient(serverURI, mqttClientId, new MemoryPersistence());
-		mqttClient.setCallback(this);
-		mqttClient.connect(connOpts);
+		ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
+		service.schedule(() -> {
+			try {
+				String serverURI = mqttProtocol + "://" + mqttHost + ":" + mqttPort;
+				logger.info("Connecting to broker {}.", serverURI);
+				mqttClient = new MqttAsyncClient(serverURI, mqttClientId, new MemoryPersistence());
+				mqttClient.setCallback(this);
+				mqttClient.connect(connOpts, null, this);
+				service.shutdown();
+			} catch (MqttException e) {
+				logger.error("Error when creating client.", e);
+			}
+		}, connectionDelay, TimeUnit.SECONDS);
 	}
 
 	@Override

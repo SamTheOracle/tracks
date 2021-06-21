@@ -62,7 +62,7 @@ public class VehicleService {
 		vehicleAssociation.setVehicle(vehicle);
 		vehicleAssociation.setUserId(vehicle.getOwner());
 		vehicleAssociationService.insertAssociation(vehicleAssociation);
-		mqttClientService.sendVehicleMessage(vehicleMessageConverter.from(vehicleAssociation,PersistenceAction.CREATE));
+		mqttClientService.sendVehicleMessage(vehicleMessageConverter.from(vehicleAssociation, PersistenceAction.CREATE));
 	}
 
 	@Transactional
@@ -111,7 +111,14 @@ public class VehicleService {
 	@Transactional
 	/**
 	 * Only owner can remove vehicle
-	 */ public void deleteVehicle(String user, Integer vehicleId, String newOwner) {
+	 */
+	public void deleteVehicle(String user, Integer vehicleId, String newOwner) {
+		if(user==null){
+			throw new BadRequestException("User cannot be null");
+		}
+		if(user.equals(newOwner)){
+			throw new BadRequestException("New user cannot be old user");
+		}
 		Optional<VehicleAssociation> vehicleAssociationOptional = vehicleAssociationService.getVehicleAssociationByUserAndVehicleId(user,
 				vehicleId);
 		if (vehicleAssociationOptional.isEmpty()) {
@@ -127,7 +134,7 @@ public class VehicleService {
 
 		Vehicle vehicle = association.getVehicle();
 		if (vehicle.getOwner().equals(user)) {
-			handleOwnerDelete(vehicle, newOwner);
+			vehicleDao.delete(vehicle);
 		}
 
 	}
