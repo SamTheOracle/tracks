@@ -1,6 +1,9 @@
 package com.oracolo.findmycar.rest.dto;
 
-public class Metadata {
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
+@RegisterForReflection
+public class MetadataDto {
   private String versionId, lastModified;
   private boolean deleted = false;
 
@@ -9,7 +12,7 @@ public class Metadata {
     return versionId;
   }
 
-  public Metadata setVersionId(String versionId) {
+  public MetadataDto setVersionId(String versionId) {
     this.versionId = versionId;
     return this;
   }
@@ -18,7 +21,7 @@ public class Metadata {
     return lastModified;
   }
 
-  public Metadata setLastModified(String lastModified) {
+  public MetadataDto setLastModified(String lastModified) {
     this.lastModified = lastModified;
     return this;
   }
@@ -27,7 +30,7 @@ public class Metadata {
     return deleted;
   }
 
-  public Metadata setDeleted(boolean deleted) {
+  public MetadataDto setDeleted(boolean deleted) {
     this.deleted = deleted;
     return this;
   }

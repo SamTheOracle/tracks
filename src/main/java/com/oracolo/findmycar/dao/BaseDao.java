@@ -20,10 +20,13 @@ public class BaseDao<T> {
 			MetadataEnable metadataEnable = (MetadataEnable) entity;
 			Metadata metadata = new Metadata();
 			metadata.setInsertDate(LocalDateTime.now());
-			metadata.setDeleted(false);
 			metadataEnable.setMetadata(metadata);
 		}
 		em.persist(entity);
+	}
+
+	public void delete(T entity) {
+		em.remove(entity);
 	}
 
 	public void update(T entity){

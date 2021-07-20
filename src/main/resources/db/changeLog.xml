@@ -8,6 +8,9 @@
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
     <changeSet author="Giacomo Zanotti" id="1">
-        <sqlFile encoding="utf8" path="creation.sql" relativeToChangelogFile="true"/>
+        <sqlFile path="creation.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+    <changeSet id="Giacomo Zanotti" author="2">
+        <sqlFile path="population.sql" relativeToChangelogFile="true"/>
     </changeSet>
 </databaseChangeLog>

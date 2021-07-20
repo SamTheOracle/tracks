@@ -2,6 +2,7 @@ package com.oracolo.findmycar.entities;
 
 import java.util.Objects;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,8 +13,8 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 @Entity
-@Table(name = "favorite_selections")
-public class FavoriteSelection implements MetadataEnable{
+@Table(name = "vehicle_associations")
+public class VehicleAssociation implements MetadataEnable{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
@@ -24,7 +25,7 @@ public class FavoriteSelection implements MetadataEnable{
 	@Column(name = "is_favorite")
 	private Boolean isFavorite;
 
-	@ManyToOne(optional = false)
+	@ManyToOne
 	private Vehicle vehicle;
 
 	@Version
@@ -66,17 +67,17 @@ public class FavoriteSelection implements MetadataEnable{
 
 	@Override
 	public String toString() {
-		return "FavoriteSelection{" + "id=" + id + ", userId='" + userId + '\'' + ", isFavorite=" + isFavorite + ", vehicle=" + vehicle
-				+ ", metadata=" + metadata + '}';
+		return "VehicleAssociation{" + "id=" + id + ", userId='" + userId + '\'' + ", isFavorite=" + isFavorite + ", vehicle=" + vehicle
+				+ ", version=" + version + ", metadata=" + metadata + '}';
 	}
 
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (!(o instanceof FavoriteSelection))
+		if (!(o instanceof VehicleAssociation))
 			return false;
-		FavoriteSelection that = (FavoriteSelection) o;
+		VehicleAssociation that = (VehicleAssociation) o;
 		return Objects.equals(id, that.id) && Objects.equals(userId, that.userId) && Objects.equals(isFavorite, that.isFavorite)
 				&& Objects.equals(vehicle, that.vehicle);
 	}

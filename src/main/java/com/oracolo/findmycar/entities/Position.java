@@ -1,5 +1,7 @@
 package com.oracolo.findmycar.entities;
 
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -33,6 +35,10 @@ public class Position implements MetadataEnable {
 	@Column(name = "timezone")
 	private String timezone;
 
+	@Column(name = "user_timestamp")
+	private String timeStamp;
+
+
 	@ManyToOne
 	private Vehicle vehicle;
 
@@ -40,6 +46,22 @@ public class Position implements MetadataEnable {
 	private int version;
 
 	private Metadata metadata;
+
+	public String getTimeStamp() {
+		return timeStamp;
+	}
+
+	public void setTimeStamp(String timeStamp) {
+		this.timeStamp = timeStamp;
+	}
+
+	public int getVersion() {
+		return version;
+	}
+
+	public void setVersion(int version) {
+		this.version = version;
+	}
 
 	public Integer getId() {
 		return id;
@@ -98,6 +120,7 @@ public class Position implements MetadataEnable {
 	}
 
 
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
@@ -112,13 +135,14 @@ public class Position implements MetadataEnable {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, latitude, longitude, chatId, userId, timezone, vehicle);
+		return Objects.hash(id);
 	}
 
 	@Override
 	public String toString() {
 		return "Position{" + "id=" + id + ", latitude='" + latitude + '\'' + ", longitude='" + longitude + '\'' + ", chatId=" + chatId
-				+ ", userId='" + userId + '\'' + ", timezone='" + timezone + '\'' + ", vehicle=" + vehicle + '}';
+				+ ", userId='" + userId + '\'' + ", timezone='" + timezone + '\'' + ", timeStamp='" + timeStamp + '\'' + ", vehicle="
+				+ vehicle + ", version=" + version + ", metadata=" + metadata + '}';
 	}
 
 	@Override

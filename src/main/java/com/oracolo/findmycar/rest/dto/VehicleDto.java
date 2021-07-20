@@ -3,22 +3,24 @@ package com.oracolo.findmycar.rest.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@RegisterForReflection
 public class VehicleDto {
-    private String owner, name, id;
-    private Metadata metadata;
+    private String owner, name;
+    private Integer id;
+    private MetadataDto metadata;
     @JsonProperty(value = "isFavorite")
     private Boolean isFavorite;
     private String bleHardware;
     private String bleHumanName;
 
-    public Metadata getMetadata() {
+    public MetadataDto getMetadata() {
         return metadata;
     }
 
-    public VehicleDto setMetadata(Metadata metadata) {
+    public VehicleDto setMetadata(MetadataDto metadata) {
         this.metadata = metadata;
         return this;
     }
@@ -42,11 +44,11 @@ public class VehicleDto {
         return this;
     }
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public VehicleDto setId(String id) {
+    public VehicleDto setId(Integer id) {
         this.id = id;
         return this;
     }
