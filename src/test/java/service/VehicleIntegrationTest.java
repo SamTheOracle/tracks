@@ -272,20 +272,7 @@ class VehicleIntegrationTest extends BaseVehicleTest {
 		given().when().get("tracks/vehicles/"+vehicleDto.getId()+"/positions/last").then().assertThat().statusCode(404);
 
 	}
-	@Test
-	@DisplayName("Should change owner when change_owner parameter is specified")
-	void shouldChangeOwner(){
-		String owner = "owner_delete_all_data";
-		VehicleDto vehicleDto = createAndGetVehicle(owner,"vehicle_name","ble_delete_all",false);
-		String newOwner = "new_owner_test";
-		createNewVehicleAssociation(newOwner,vehicleDto.getId(),false);
-		given().when().queryParam("owner", owner).queryParam("new_owner",newOwner).delete("tracks/vehicles/" + vehicleDto.getId()).then().assertThat().statusCode(204);
 
-		VehicleDto changedOwnerVehicleDto = getVehicleDto(newOwner);
-		Assertions.assertEquals(newOwner,changedOwnerVehicleDto.getOwner());
-
-
-	}
 
 
 }

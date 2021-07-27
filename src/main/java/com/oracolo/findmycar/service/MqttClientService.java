@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 
+import io.quarkus.arc.profile.UnlessBuildProfile;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -118,7 +119,7 @@ public class MqttClientService implements IMqttActionListener, MqttCallbackExten
 	private void sendMessage(String topic, byte[] message, boolean retained) {
 		try {
 			mqttClient.publish(topic, message, 0, retained);
-		} catch (MqttException e) {
+		} catch (Exception e) {
 			logger.error("Could not send message.", e);
 		}
 	}
