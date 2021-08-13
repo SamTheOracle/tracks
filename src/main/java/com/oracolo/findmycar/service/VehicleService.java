@@ -53,12 +53,7 @@ public class VehicleService {
 		vehicleDao.insert(vehicle);
 
 		VehicleAssociation vehicleAssociation = new VehicleAssociation();
-		if (isFavorite) {
-
-			vehicleAssociation.setFavorite(true);
-		} else {
-			vehicleAssociation.setFavorite(false);
-		}
+		vehicleAssociation.setFavorite(isFavorite);
 		vehicleAssociation.setVehicle(vehicle);
 		vehicleAssociation.setUserId(vehicle.getOwner());
 		vehicleAssociationService.insertAssociation(vehicleAssociation);
@@ -108,16 +103,13 @@ public class VehicleService {
 		return vehicleAssociationService.getVehicleAssociationByUserAndVehicleId(vehicle.getOwner(), vehicleId);
 	}
 
-	@Transactional
 	/**
 	 * Only owner can remove vehicle
 	 */
-	public void deleteVehicle(String user, Integer vehicleId, String newOwner) {
+	@Transactional
+	public void deleteVehicle(String user, Integer vehicleId) {
 		if(user==null){
 			throw new BadRequestException("User cannot be null");
-		}
-		if(user.equals(newOwner)){
-			throw new BadRequestException("New user cannot be old user");
 		}
 		Optional<VehicleAssociation> vehicleAssociationOptional = vehicleAssociationService.getVehicleAssociationByUserAndVehicleId(user,
 				vehicleId);
@@ -135,21 +127,6 @@ public class VehicleService {
 		Vehicle vehicle = association.getVehicle();
 		if (vehicle.getOwner().equals(user)) {
 			vehicleDao.delete(vehicle);
-		}
-
-	}
-
-	private void handleOwnerDelete(Vehicle vehicle, String newOwner) {
-		List<VehicleAssociation> associations = vehicleAssociationService.getVehicleAssociationsById(vehicle.getId());
-		if (associations.isEmpty() && newOwner != null) {
-			throw new BadRequestException("Cannot change new owner. No other association present on vehicle " + vehicle.getId());
-		}
-		if (associations.isEmpty()) {
-			vehicleDao.delete(vehicle);
-			return;
-		}
-		if (newOwner != null) {
-			vehicle.setOwner(newOwner);
 		}
 
 	}

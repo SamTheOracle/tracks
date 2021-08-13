@@ -15,11 +15,11 @@ import com.oracolo.findmycar.rest.dto.VehicleDto;
 @ApplicationScoped
 public class VehicleConverter {
 
-	public Vehicle from(NewVehicleDto vehicleDto){
+	public Vehicle from(NewVehicleDto vehicleDto,String loggedUserId){
 		Vehicle vehicle = new Vehicle();
 		vehicle.setVehicleName(vehicleDto.vehicleName);
 		vehicle.setBleHardwareMac(vehicleDto.bleHardware);
-		vehicle.setOwner(vehicleDto.owner);
+		vehicle.setOwner(loggedUserId);
 
 		return vehicle;
 	}

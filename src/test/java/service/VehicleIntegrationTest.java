@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.oracolo.findmycar.Role;
 import com.oracolo.findmycar.rest.dto.ErrorDto;
 import com.oracolo.findmycar.rest.dto.NewVehicleDto;
 import com.oracolo.findmycar.rest.dto.PositionDto;
@@ -22,10 +23,11 @@ import com.oracolo.findmycar.rest.dto.VehicleDto;
 
 import commons.BaseVehicleTest;
 import commons.VehicleTestProfile;
-import io.quarkus.test.common.QuarkusTestResource;
-import io.quarkus.test.h2.H2DatabaseTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
+import io.quarkus.test.security.TestSecurity;
+import io.quarkus.test.security.oidc.Claim;
+import io.quarkus.test.security.oidc.OidcSecurity;
 import io.restassured.response.Response;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.Json;
@@ -33,7 +35,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 @QuarkusTest
-@QuarkusTestResource(H2DatabaseTestResource.class)
 @TestProfile(VehicleTestProfile.class)
 class VehicleIntegrationTest extends BaseVehicleTest {
 
@@ -41,17 +42,18 @@ class VehicleIntegrationTest extends BaseVehicleTest {
 	private static final String BLE_HARDWARE_A = "mac_address_a";
 	private static final String VEHICLE_NAME_A = "vehicle_name_a";
 
-
 	@Test
 	@DisplayName("Should get vehicle by owner")
+	@TestSecurity(user = "user", roles = Role.USER)
+	@OidcSecurity(claims = { @Claim(key = "sub", value = OWNER_A ), @Claim(key = "email", value = "gzano93@gmail.com") })
 	void shouldGetVehicleByOwnerTest() {
 		NewVehicleDto newVehicleDto = new NewVehicleDto();
-		newVehicleDto.owner = OWNER_A;
 		newVehicleDto.vehicleName = VEHICLE_NAME_A;
 		newVehicleDto.bleHardware = BLE_HARDWARE_A;
 		newVehicleDto.isFavorite = true;
 		given().body(newVehicleDto).contentType(MediaType.APPLICATION_JSON).post("tracks/vehicles").then().assertThat().statusCode(204);
-		Response response = given().when().queryParam("owner", OWNER_A).get("tracks/vehicles");
+		Response response = given().when().get("tracks/vehicles");
+		String r = response.getBody().asPrettyString();
 		Assertions.assertEquals(200, response.getStatusCode());
 		JsonArray jsonArray = Assertions.assertDoesNotThrow(() -> new JsonArray(Buffer.buffer(response.body().asByteArray())));
 		Assertions.assertFalse(jsonArray.isEmpty());
@@ -228,8 +230,10 @@ class VehicleIntegrationTest extends BaseVehicleTest {
 		Assertions.assertEquals(1, vehicleDtos.size());
 		VehicleDto responseDto = Assertions.assertDoesNotThrow(() -> vehicleDtos.stream().findFirst().orElseThrow());
 
-		given().when().queryParam("owner", "different_owner").delete("tracks/vehicles/" + responseDto.getId()).then().assertThat().statusCode(403);
+		given().when().queryParam("owner", "different_owner").delete(
+				"tracks/vehicles/" + responseDto.getId()).then().assertThat().statusCode(403);
 	}
+
 	@Test
 	@DisplayName("Should delete vehicle")
 	public void shouldDeleteVehicle() {
@@ -249,30 +253,29 @@ class VehicleIntegrationTest extends BaseVehicleTest {
 
 		given().when().queryParam("owner", owner).delete("tracks/vehicles/" + responseDto.getId()).then().assertThat().statusCode(204);
 
-		given().when().get("tracks/vehicles/"+responseDto.getId()).then().assertThat().statusCode(404);
+		given().when().get("tracks/vehicles/" + responseDto.getId()).then().assertThat().statusCode(404);
 	}
 
 	@Test
 	@DisplayName("Should delete all vehicle-related data after delete")
-	void shouldDeleteAllVehicleRelatedData(){
+	void shouldDeleteAllVehicleRelatedData() {
 		String owner = "owner_delete_all_data_ok";
-		VehicleDto vehicleDto = createAndGetVehicle(owner,"vehicle_name","ble_delete_all_ok",false);
+		VehicleDto vehicleDto = createAndGetVehicle(owner, "vehicle_name", "ble_delete_all_ok", false);
 		PositionDto positionDto = new PositionDto();
 		positionDto.userId = owner;
-		positionDto.chatId=1234L;
-		positionDto.timezone="Europe/Rome";
-		positionDto.latitude="lat";
-		positionDto.longitude="long";
+		positionDto.chatId = 1234L;
+		positionDto.timezone = "Europe/Rome";
+		positionDto.latitude = "lat";
+		positionDto.longitude = "long";
 		positionDto.timestamp = ZonedDateTime.now(ZoneId.of(positionDto.timezone)).toString();
 
-		given().when().body(positionDto).contentType(MediaType.APPLICATION_JSON).post("tracks/vehicles/"+vehicleDto.getId()+"/positions").then().assertThat().statusCode(204);
+		given().when().body(positionDto).contentType(MediaType.APPLICATION_JSON).post(
+				"tracks/vehicles/" + vehicleDto.getId() + "/positions").then().assertThat().statusCode(204);
 
 		given().when().queryParam("owner", owner).delete("tracks/vehicles/" + vehicleDto.getId()).then().assertThat().statusCode(204);
 
 		given().when().get("tracks/vehicles/"+vehicleDto.getId()+"/positions/last").then().assertThat().statusCode(404);
 
 	}
-
-
 
 }

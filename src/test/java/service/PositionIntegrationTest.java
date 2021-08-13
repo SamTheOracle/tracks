@@ -18,14 +18,11 @@ import com.oracolo.findmycar.rest.dto.VehicleDto;
 import commons.BaseVehicleTest;
 import commons.PositionTestProfile;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.quarkus.test.common.QuarkusTestResource;
-import io.quarkus.test.h2.H2DatabaseTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.restassured.response.Response;
 
 @QuarkusTest
-@QuarkusTestResource(H2DatabaseTestResource.class)
 @TestProfile(PositionTestProfile.class)
 class PositionIntegrationTest extends BaseVehicleTest {
 
