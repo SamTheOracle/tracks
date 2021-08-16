@@ -10,7 +10,6 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @RegisterForReflection
 public class NewVehicleDto {
-    @NotNull
     public String owner;
     @NotNull
     public String bleHardware;

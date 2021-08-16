@@ -2,7 +2,10 @@ package com.oracolo.findmycar.rest;
 
 import java.util.List;
 
+import javax.annotation.security.RolesAllowed;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
@@ -20,6 +23,8 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.oracolo.findmycar.BaseRest;
+import com.oracolo.findmycar.Role;
 import com.oracolo.findmycar.rest.converter.PositionConverter;
 import com.oracolo.findmycar.rest.converter.VehicleAssociationConverter;
 import com.oracolo.findmycar.rest.converter.VehicleConverter;
@@ -37,8 +42,10 @@ import com.oracolo.findmycar.validators.QueryVehicleValidator;
 import com.oracolo.findmycar.validators.UpdateVehicleValidator;
 import com.oracolo.findmycar.validators.VehicleAssociationValidator;
 
+@RequestScoped
+@RolesAllowed(Role.USER)
 @Path("tracks/vehicles")
-public class VehicleRest {
+public class VehicleRest extends BaseRest {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
 	@Inject
@@ -74,27 +81,28 @@ public class VehicleRest {
 	@Inject
 	VehicleAssociationConverter vehicleAssociationConverter;
 
+
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void createNewVehicle(@NotNull NewVehicleDto vehicleDto) {
 		newVehicleValidator.validate(vehicleDto);
-
-		vehicleService.createVehicle(vehicleConverter.from(vehicleDto), vehicleDto.isFavorite);
+		String loggedUserId = getLoggedUserId();
+		vehicleService.createVehicle(vehicleConverter.from(vehicleDto,loggedUserId), vehicleDto.isFavorite);
 	}
 
 	@GET
 	@Path("{vehicleId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public VehicleDto getVehicles(@PathParam("vehicleId") Integer vehicleId) {
-		return vehicleConverter.toVehicleDto(
+		return vehicleConverter.to(
 				vehicleService.getVehicleAssociationByVehicleId(vehicleId).orElseThrow(NotFoundException::new));
 	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<VehicleDto> getVehicles(@QueryParam("owner") String owner) {
-		queryVehicleValidator.validateQueryParameters(owner);
-		return vehicleConverter.toVehicleDto(vehicleAssociationService.getVehicleAssociationByOwner(owner));
+	public List<VehicleDto> getVehicles() {
+		String loggedUserId = getLoggedUserId();
+		return vehicleConverter.to(vehicleAssociationService.getVehicleAssociationByOwner(loggedUserId));
 	}
 
 	@PUT
@@ -103,19 +111,16 @@ public class VehicleRest {
 	public void updateVehicle(@NotNull UpdateVehicleDto updateVehicleDto, @PathParam("vehicleId") Integer vehicleId) {
 
 		updateVehicleValidator.validate(updateVehicleDto);
-
 		updateVehicleValidator.validateUpdateForGivenPathId(vehicleId, updateVehicleDto);
-
-		vehicleService.updateVehicle(vehicleId, vehicleConverter.from(updateVehicleDto));
+		vehicleService.updateVehicle(vehicleId,updateVehicleDto.vehicleName,updateVehicleDto.isFavorite,getLoggedUserId());
 	}
 
 	@DELETE
 	@Path("{vehicleId}")
-	public void deleteVehicle(@PathParam("vehicleId") Integer vehicleId, @QueryParam("owner") String owner,
-			@QueryParam("new_owner") String newOwner) {
-		queryVehicleValidator.validateQueryParameters(owner);
+	public void deleteVehicle(@NotNull @PathParam("vehicleId") Integer vehicleId) {
+		queryVehicleValidator.validate(vehicleId);
 
-		vehicleService.deleteVehicle(owner, vehicleId, newOwner);
+		vehicleService.deleteVehicle(getLoggedUserId(), vehicleId);
 
 	}
 
@@ -124,7 +129,7 @@ public class VehicleRest {
 	@Consumes(value = MediaType.APPLICATION_JSON)
 	public void createPosition(PositionDto positionDto, @PathParam("vehicleId") Integer vehicleId) {
 		positionValidator.validate(positionDto);
-		positionService.createNewPosition(positionConverter.from(positionDto, vehicleId));
+		positionService.createNewPosition(positionConverter.from(positionDto, vehicleId,getLoggedUserId()));
 	}
 
 	@GET

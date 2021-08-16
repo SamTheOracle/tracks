@@ -1,6 +1,5 @@
 package unit;
 
-import static io.restassured.RestAssured.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,9 +16,9 @@ import org.mockito.ArgumentCaptor;
 import com.oracolo.findmycar.dao.VehicleDao;
 import com.oracolo.findmycar.entities.Vehicle;
 import com.oracolo.findmycar.entities.VehicleAssociation;
-
 import com.oracolo.findmycar.service.VehicleAssociationService;
 import com.oracolo.findmycar.service.VehicleService;
+
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 

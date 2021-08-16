@@ -1,7 +1,6 @@
 package com.oracolo.findmycar.rest.converter;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -15,15 +14,15 @@ import com.oracolo.findmycar.rest.dto.VehicleDto;
 @ApplicationScoped
 public class VehicleConverter {
 
-	public Vehicle from(NewVehicleDto vehicleDto){
+	public Vehicle from(NewVehicleDto vehicleDto,String loggedUserId){
 		Vehicle vehicle = new Vehicle();
 		vehicle.setVehicleName(vehicleDto.vehicleName);
 		vehicle.setBleHardwareMac(vehicleDto.bleHardware);
-		vehicle.setOwner(vehicleDto.owner);
+		vehicle.setOwner(loggedUserId);
 
 		return vehicle;
 	}
-	public VehicleAssociation from(UpdateVehicleDto vehicleDto){
+	public VehicleAssociation from(UpdateVehicleDto vehicleDto,String loggedUserId){
 		Vehicle vehicle = new Vehicle();
 		vehicle.setVehicleName(vehicleDto.vehicleName);
 		vehicle.setId(vehicleDto.id);
@@ -33,7 +32,7 @@ public class VehicleConverter {
 		return vehicleAssociation;
 	}
 
-	public VehicleDto toVehicleDto(VehicleAssociation vehicleAssociation) {
+	public VehicleDto to(VehicleAssociation vehicleAssociation) {
 		VehicleDto vehicleDto = new VehicleDto();
 		Vehicle vehicle = vehicleAssociation.getVehicle();
 		vehicleDto.setOwner(vehicle.getOwner());
@@ -43,7 +42,7 @@ public class VehicleConverter {
 		vehicleDto.setIsFavorite(vehicleAssociation.getFavorite());
 		return vehicleDto;
 	}
-	public List<VehicleDto> toVehicleDto(List<VehicleAssociation> vehicleAssociations){
-		return vehicleAssociations.stream().map(this::toVehicleDto).collect(Collectors.toUnmodifiableList());
+	public List<VehicleDto> to(List<VehicleAssociation> vehicleAssociations){
+		return vehicleAssociations.stream().map(this::to).collect(Collectors.toUnmodifiableList());
 	}
 }
