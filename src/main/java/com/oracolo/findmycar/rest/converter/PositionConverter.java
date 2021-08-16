@@ -15,17 +15,17 @@ public class PositionConverter {
 	@Inject
 	VehicleAssociationService vehicleAssociationService;
 
-	public Position from(PositionDto positionDto, Integer vehicleId) {
+	public Position from(PositionDto positionDto, Integer vehicleId, String loggedUserId) {
 		Position position = new Position();
 		position.setChatId(positionDto.chatId);
 		position.setLatitude(positionDto.latitude);
 		position.setLongitude(positionDto.longitude);
-		position.setUserId(positionDto.userId);
+		position.setUserId(loggedUserId);
 		position.setTimezone(positionDto.timezone);
 		position.setTimeStamp(positionDto.timestamp);
-		position.setVehicle(vehicleAssociationService.getVehicleAssociationByUserAndVehicleId(positionDto.userId, vehicleId).map(
+		position.setVehicle(vehicleAssociationService.getVehicleAssociationByUserAndVehicleId(loggedUserId, vehicleId).map(
 				VehicleAssociation::getVehicle).orElseThrow(
-				() -> new ForbiddenException("User with id " + positionDto.userId + " has no association on vehicle " + vehicleId)));
+				() -> new ForbiddenException("User with id " + loggedUserId + " has no association on vehicle " + vehicleId)));
 		return position;
 	}
 

@@ -1,12 +1,11 @@
 package com.oracolo.findmycar.rest;
 
 import java.util.List;
-import java.util.Map;
 
-import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
@@ -21,7 +20,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import org.keycloak.KeycloakPrincipal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,9 +42,8 @@ import com.oracolo.findmycar.validators.QueryVehicleValidator;
 import com.oracolo.findmycar.validators.UpdateVehicleValidator;
 import com.oracolo.findmycar.validators.VehicleAssociationValidator;
 
-import io.quarkus.security.identity.SecurityIdentity;
-
 @RequestScoped
+@RolesAllowed(Role.USER)
 @Path("tracks/vehicles")
 public class VehicleRest extends BaseRest {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
@@ -86,7 +83,6 @@ public class VehicleRest extends BaseRest {
 
 
 	@POST
-	@RolesAllowed({ Role.USER,Role.OWNER })
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void createNewVehicle(@NotNull NewVehicleDto vehicleDto) {
 		newVehicleValidator.validate(vehicleDto);
@@ -96,56 +92,48 @@ public class VehicleRest extends BaseRest {
 
 	@GET
 	@Path("{vehicleId}")
-	@RolesAllowed({ Role.USER,Role.OWNER })
 	@Produces(MediaType.APPLICATION_JSON)
 	public VehicleDto getVehicles(@PathParam("vehicleId") Integer vehicleId) {
-		return vehicleConverter.toVehicleDto(
+		return vehicleConverter.to(
 				vehicleService.getVehicleAssociationByVehicleId(vehicleId).orElseThrow(NotFoundException::new));
 	}
 
 	@GET
-	@RolesAllowed({ Role.USER,Role.OWNER })
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<VehicleDto> getVehicles() {
 		String loggedUserId = getLoggedUserId();
-		return vehicleConverter.toVehicleDto(vehicleAssociationService.getVehicleAssociationByOwner(loggedUserId));
+		return vehicleConverter.to(vehicleAssociationService.getVehicleAssociationByOwner(loggedUserId));
 	}
 
 	@PUT
 	@Path("{vehicleId}")
-	@RolesAllowed(Role.OWNER)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void updateVehicle(@NotNull UpdateVehicleDto updateVehicleDto, @PathParam("vehicleId") Integer vehicleId) {
 
 		updateVehicleValidator.validate(updateVehicleDto);
-
 		updateVehicleValidator.validateUpdateForGivenPathId(vehicleId, updateVehicleDto);
-
-		vehicleService.updateVehicle(vehicleId, vehicleConverter.from(updateVehicleDto));
+		vehicleService.updateVehicle(vehicleId,updateVehicleDto.vehicleName,updateVehicleDto.isFavorite,getLoggedUserId());
 	}
 
 	@DELETE
-	@RolesAllowed(Role.OWNER)
 	@Path("{vehicleId}")
-	public void deleteVehicle(@PathParam("vehicleId") Integer vehicleId, @QueryParam("owner") String owner) {
-		queryVehicleValidator.validateQueryParameters(owner);
+	public void deleteVehicle(@NotNull @PathParam("vehicleId") Integer vehicleId) {
+		queryVehicleValidator.validate(vehicleId);
 
-		vehicleService.deleteVehicle(owner, vehicleId);
+		vehicleService.deleteVehicle(getLoggedUserId(), vehicleId);
 
 	}
 
 	@POST
 	@Path("{vehicleId}/positions")
-	@RolesAllowed({Role.USER,Role.OWNER})
 	@Consumes(value = MediaType.APPLICATION_JSON)
 	public void createPosition(PositionDto positionDto, @PathParam("vehicleId") Integer vehicleId) {
 		positionValidator.validate(positionDto);
-		positionService.createNewPosition(positionConverter.from(positionDto, vehicleId));
+		positionService.createNewPosition(positionConverter.from(positionDto, vehicleId,getLoggedUserId()));
 	}
 
 	@GET
 	@Path("{vehicleId}/positions/last")
-	@RolesAllowed({Role.USER,Role.OWNER})
 	@Produces(value = MediaType.APPLICATION_JSON)
 	public PositionDto getLastPositionForVehicle(@PathParam("vehicleId") Integer vehicleId) {
 		return positionConverter.to(positionService.getLastPositionByVehicleId(vehicleId));
@@ -153,7 +141,6 @@ public class VehicleRest extends BaseRest {
 
 	@POST
 	@Path("{vehicleId}/associations")
-	@RolesAllowed(Role.OWNER)
 	public void createNewAssociation(@PathParam("vehicleId") Integer vehicleId, @NotNull VehicleAssociationDto vehicleAssociationDto) {
 		vehicleAssociationValidator.validate(vehicleAssociationDto);
 		vehicleAssociationService.insertAssociation(vehicleAssociationConverter.from(vehicleAssociationDto,

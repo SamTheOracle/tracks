@@ -41,11 +41,32 @@ class VehicleIntegrationTest extends BaseVehicleTest {
 	private static final String OWNER_A = "owner_a";
 	private static final String BLE_HARDWARE_A = "mac_address_a";
 	private static final String VEHICLE_NAME_A = "vehicle_name_a";
+	private static final String OWNER_B = "owner_b";
+	private static final String BLE_HARDWARE_B = "mac_address_b";
+	private static final String VEHICLE_NAME_B = "vehicle_name_b";
+	private static final String OWNER_C = "owner_c";
+	private static final String BLE_HARDWARE_C = "mac_address_c";
+	private static final String VEHICLE_NAME_C = "vehicle_name_c";
+	private static final String OWNER_D = "owner_d";
+	private static final String BLE_HARDWARE_D = "mac_address_d";
+	private static final String VEHICLE_NAME_D = "vehicle_name_d";
+	private static final String OWNER_E = "owner_e";
+	private static final String BLE_HARDWARE_E = "mac_address_e";
+	private static final String VEHICLE_NAME_E = "vehicle_name_e";
+	private static final String OWNER_F = "owner_f";
+	private static final String BLE_HARDWARE_F = "mac_address_f";
+	private static final String VEHICLE_NAME_F = "vehicle_name_f";
+	private static final String OWNER_G = "owner_g";
+	private static final String BLE_HARDWARE_G = "ble_hardware_g";
+	private static final String VEHICLE_NAME_G = "vehicle_name_g";
+	private static final String OWNER_H = "owner_h";
+	private static final String VEHICLE_NAME_H = "vehicle_name_h";
+	private static final String BLE_HARDWARE_H = "ble_hardware_h";
 
 	@Test
 	@DisplayName("Should get vehicle by owner")
 	@TestSecurity(user = "user", roles = Role.USER)
-	@OidcSecurity(claims = { @Claim(key = "sub", value = OWNER_A ), @Claim(key = "email", value = "gzano93@gmail.com") })
+	@OidcSecurity(claims = { @Claim(key = "sub", value = OWNER_A), @Claim(key = "email", value = "gzano93@gmail.com") })
 	void shouldGetVehicleByOwnerTest() {
 		NewVehicleDto newVehicleDto = new NewVehicleDto();
 		newVehicleDto.vehicleName = VEHICLE_NAME_A;
@@ -53,7 +74,6 @@ class VehicleIntegrationTest extends BaseVehicleTest {
 		newVehicleDto.isFavorite = true;
 		given().body(newVehicleDto).contentType(MediaType.APPLICATION_JSON).post("tracks/vehicles").then().assertThat().statusCode(204);
 		Response response = given().when().get("tracks/vehicles");
-		String r = response.getBody().asPrettyString();
 		Assertions.assertEquals(200, response.getStatusCode());
 		JsonArray jsonArray = Assertions.assertDoesNotThrow(() -> new JsonArray(Buffer.buffer(response.body().asByteArray())));
 		Assertions.assertFalse(jsonArray.isEmpty());
@@ -64,8 +84,10 @@ class VehicleIntegrationTest extends BaseVehicleTest {
 
 	@Test
 	@DisplayName("Should get empty vehicle list by owner")
+	@TestSecurity(user = "user", roles = Role.USER)
+	@OidcSecurity(claims = { @Claim(key = "sub", value = OWNER_B), @Claim(key = "email", value = "gzano93@gmail.com") })
 	void shouldGetEmptyVehicleListByOwnerTest() {
-		Response response = given().when().queryParam("owner", "test").get("tracks/vehicles");
+		Response response = given().when().get("tracks/vehicles");
 		Assertions.assertEquals(200, response.getStatusCode());
 		JsonArray jsonArray = Assertions.assertDoesNotThrow(() -> new JsonArray(Buffer.buffer(response.body().asByteArray())));
 		Assertions.assertTrue(jsonArray.isEmpty());
@@ -73,29 +95,24 @@ class VehicleIntegrationTest extends BaseVehicleTest {
 
 	@Test
 	@DisplayName("Only one vehicle should be favorite")
+	@TestSecurity(user = "user", roles = Role.USER)
+	@OidcSecurity(claims = { @Claim(key = "sub", value = OWNER_C), @Claim(key = "email", value = "gzano93@gmail.com") })
 	void vehicleAShouldBeFavorite() {
-		String owner = "owner";
 
-		String vehicleNameC = "vehicle_name_c";
-		String bleHardwareC = "ble_hardware_c";
 		NewVehicleDto vehicleDtoC = new NewVehicleDto();
-		vehicleDtoC.owner = owner;
-		vehicleDtoC.vehicleName = vehicleNameC;
-		vehicleDtoC.bleHardware = bleHardwareC;
+		vehicleDtoC.vehicleName = VEHICLE_NAME_C;
+		vehicleDtoC.bleHardware = BLE_HARDWARE_C;
 		vehicleDtoC.isFavorite = true;
 
-		String vehicleNameB = "vehicle_name_b";
-		String bleHardwareB = "ble_hardware_b";
 		NewVehicleDto vehicleDtoB = new NewVehicleDto();
-		vehicleDtoB.owner = owner;
-		vehicleDtoB.vehicleName = vehicleNameB;
-		vehicleDtoB.bleHardware = bleHardwareB;
+		vehicleDtoB.vehicleName = VEHICLE_NAME_B;
+		vehicleDtoB.bleHardware = BLE_HARDWARE_B;
 		vehicleDtoB.isFavorite = false;
 
 		given().body(vehicleDtoC).contentType(MediaType.APPLICATION_JSON).post("tracks/vehicles").then().assertThat().statusCode(204);
 		given().body(vehicleDtoB).contentType(MediaType.APPLICATION_JSON).post("tracks/vehicles").then().assertThat().statusCode(204);
 
-		Response response = given().when().queryParam("owner", owner).get("tracks/vehicles");
+		Response response = given().when().get("tracks/vehicles");
 		Assertions.assertEquals(200, response.getStatusCode());
 		JsonArray vehiclesArray = Assertions.assertDoesNotThrow(() -> new JsonArray(Buffer.buffer(response.body().asByteArray())));
 		Assertions.assertTrue(vehiclesArray.size() >= 2);
@@ -111,15 +128,15 @@ class VehicleIntegrationTest extends BaseVehicleTest {
 
 	@Test
 	@DisplayName("Should update only vehicle name")
+	@TestSecurity(user = "user", roles = Role.USER)
+	@OidcSecurity(claims = { @Claim(key = "sub", value = OWNER_D), @Claim(key = "email", value = "gzano93@gmail.com") })
 	public void shouldUpdateVehicleName() {
 		String owner = "owner_to_update";
 
-		String vehicleName = "vehicle_name_to_update";
-		String bleHardware = "ble_hardware_to_update";
+
 		NewVehicleDto vehicleDto = new NewVehicleDto();
-		vehicleDto.owner = owner;
-		vehicleDto.vehicleName = vehicleName;
-		vehicleDto.bleHardware = bleHardware;
+		vehicleDto.vehicleName = VEHICLE_NAME_D;
+		vehicleDto.bleHardware = BLE_HARDWARE_D;
 		vehicleDto.isFavorite = true;
 
 		given().body(vehicleDto).contentType(MediaType.APPLICATION_JSON).post("tracks/vehicles").then().assertThat().statusCode(204);
@@ -148,26 +165,26 @@ class VehicleIntegrationTest extends BaseVehicleTest {
 
 	@Test
 	@DisplayName("Should update vehicle name and is favorite")
+	@TestSecurity(user = "user", roles = Role.USER)
+	@OidcSecurity(claims = { @Claim(key = "sub", value = OWNER_E), @Claim(key = "email", value = "gzano93@gmail.com") })
 	public void shouldUpdateVehicleNameAndIsFavorite() {
-		String owner = "update_vehicle_name_and_favorite_owner";
-		String ble1 = "update_vehicle_name_is_favorite_ble_";
-		String vehicleName1 = "vehicle_name_to_change";
-		NewVehicleDto newVehicleDto1 = createNewVehicleDto(owner, ble1, true, vehicleName1);
+
+		NewVehicleDto newVehicleDto1 = createNewVehicleDto(OWNER_E, BLE_HARDWARE_E, true, VEHICLE_NAME_E);
 		given().body(newVehicleDto1).contentType(MediaType.APPLICATION_JSON).post("tracks/vehicles").then().assertThat().statusCode(204);
 
 		String ble2 = "update_vehicle_name_is_favorite_ble_2";
 		String vehicleName2 = "vehicle_name_to_change_2";
-		NewVehicleDto newVehicleDto2 = createNewVehicleDto(owner, ble2, false, vehicleName2);
+		NewVehicleDto newVehicleDto2 = createNewVehicleDto(OWNER_E, ble2, false, vehicleName2);
 		given().body(newVehicleDto2).contentType(MediaType.APPLICATION_JSON).post("tracks/vehicles").then().assertThat().statusCode(204);
 
-		Response response = given().when().queryParam("owner", owner).get("tracks/vehicles");
+		Response response = given().when().get("tracks/vehicles");
 		Assertions.assertEquals(200, response.statusCode());
 		JsonArray vehiclesArray = Assertions.assertDoesNotThrow(() -> new JsonArray(Buffer.buffer(response.body().asByteArray())));
 		List<VehicleDto> vehicleDtos = vehiclesArray.stream().map(JsonObject::mapFrom).map(
 				json -> Json.decodeValue(json.encode(), VehicleDto.class)).collect(Collectors.toUnmodifiableList());
 		Assertions.assertEquals(vehicleDtos.size(), 2);
 		VehicleDto responseDto = Assertions.assertDoesNotThrow(
-				() -> vehicleDtos.stream().filter(dto -> dto.getName().equals(vehicleName1)).findFirst().orElseThrow());
+				() -> vehicleDtos.stream().filter(dto -> dto.getName().equals(VEHICLE_NAME_E)).findFirst().orElseThrow());
 
 		String newVehicleName = "this is a new name";
 
@@ -193,6 +210,8 @@ class VehicleIntegrationTest extends BaseVehicleTest {
 
 	@Test
 	@DisplayName("Should throw Forbidden when dto id not equal to path id")
+	@TestSecurity(user = "user", roles = Role.USER)
+	@OidcSecurity(claims = { @Claim(key = "sub", value = OWNER_A), @Claim(key = "email", value = "gzano93@gmail.com") })
 	public void shouldThrowForbiddenWhenDtoIdNotEqualToPathId() {
 		UpdateVehicleDto updateVehicleDto = new UpdateVehicleDto();
 		updateVehicleDto.id = 12;
@@ -207,6 +226,8 @@ class VehicleIntegrationTest extends BaseVehicleTest {
 
 	@Test
 	@DisplayName("Should throw Forbidden if id is null in put request")
+	@TestSecurity(user = "user", roles = Role.USER)
+	@OidcSecurity(claims = { @Claim(key = "sub", value = OWNER_G ), @Claim(key = "email", value = "gzano93@gmail.com") })
 	public void shouldThrowForbiddenDuringPutVehicle() {
 
 		UpdateVehicleDto updateVehicleDto = new UpdateVehicleDto();
@@ -215,54 +236,27 @@ class VehicleIntegrationTest extends BaseVehicleTest {
 	}
 
 	@Test
-	@DisplayName("Should throw forbidden when deleting a vehicle with different owner")
-	public void shouldThrowForbiddenWhenDeletingAVehicleWithDifferentOwner() {
-		String owner = "delete_owner_forbidden";
-		NewVehicleDto newVehicleDto = createNewVehicleDto(owner, "delete_ble_forbidden", false, "vehicle_name_delete_forbidden");
-		given().body(newVehicleDto).contentType(MediaType.APPLICATION_JSON).post("tracks/vehicles").then().assertThat().statusCode(204);
-
-		Response response = given().when().queryParam("owner", owner).get("tracks/vehicles");
-		Assertions.assertEquals(200, response.statusCode());
-
-		JsonArray vehiclesArray = Assertions.assertDoesNotThrow(() -> new JsonArray(Buffer.buffer(response.body().asByteArray())));
-		List<VehicleDto> vehicleDtos = vehiclesArray.stream().map(JsonObject::mapFrom).map(
-				json -> Json.decodeValue(json.encode(), VehicleDto.class)).collect(Collectors.toUnmodifiableList());
-		Assertions.assertEquals(1, vehicleDtos.size());
-		VehicleDto responseDto = Assertions.assertDoesNotThrow(() -> vehicleDtos.stream().findFirst().orElseThrow());
-
-		given().when().queryParam("owner", "different_owner").delete(
-				"tracks/vehicles/" + responseDto.getId()).then().assertThat().statusCode(403);
-	}
-
-	@Test
 	@DisplayName("Should delete vehicle")
+	@TestSecurity(user = "user", roles = Role.USER)
+	@OidcSecurity(claims = { @Claim(key = "sub", value = OWNER_G ), @Claim(key = "email", value = "gzano93@gmail.com") })
 	public void shouldDeleteVehicle() {
-		String owner = "delete_owner";
-		System.out.println(ZonedDateTime.now());
-		NewVehicleDto newVehicleDto = createNewVehicleDto(owner, "delete_ble", false, "vehicle_name_delete");
-		given().body(newVehicleDto).contentType(MediaType.APPLICATION_JSON).post("tracks/vehicles").then().assertThat().statusCode(204);
 
-		Response response = given().when().queryParam("owner", owner).get("tracks/vehicles");
-		Assertions.assertEquals(200, response.statusCode());
+		VehicleDto responseDto = createAndGetVehicle(OWNER_G, VEHICLE_NAME_G, BLE_HARDWARE_G, false);
 
-		JsonArray vehiclesArray = Assertions.assertDoesNotThrow(() -> new JsonArray(Buffer.buffer(response.body().asByteArray())));
-		List<VehicleDto> vehicleDtos = vehiclesArray.stream().map(JsonObject::mapFrom).map(
-				json -> Json.decodeValue(json.encode(), VehicleDto.class)).collect(Collectors.toUnmodifiableList());
-		Assertions.assertEquals(1, vehicleDtos.size());
-		VehicleDto responseDto = Assertions.assertDoesNotThrow(() -> vehicleDtos.stream().findFirst().orElseThrow());
 
-		given().when().queryParam("owner", owner).delete("tracks/vehicles/" + responseDto.getId()).then().assertThat().statusCode(204);
+
+		given().when().delete("tracks/vehicles/" + responseDto.getId()).then().assertThat().statusCode(204);
 
 		given().when().get("tracks/vehicles/" + responseDto.getId()).then().assertThat().statusCode(404);
 	}
 
 	@Test
 	@DisplayName("Should delete all vehicle-related data after delete")
+	@TestSecurity(user = "user", roles = Role.USER)
+	@OidcSecurity(claims = { @Claim(key = "sub", value = OWNER_H), @Claim(key = "email", value = "gzano93@gmail.com") })
 	void shouldDeleteAllVehicleRelatedData() {
-		String owner = "owner_delete_all_data_ok";
-		VehicleDto vehicleDto = createAndGetVehicle(owner, "vehicle_name", "ble_delete_all_ok", false);
+		VehicleDto vehicleDto = createAndGetVehicle(OWNER_H, VEHICLE_NAME_H, BLE_HARDWARE_H, false);
 		PositionDto positionDto = new PositionDto();
-		positionDto.userId = owner;
 		positionDto.chatId = 1234L;
 		positionDto.timezone = "Europe/Rome";
 		positionDto.latitude = "lat";
@@ -272,9 +266,9 @@ class VehicleIntegrationTest extends BaseVehicleTest {
 		given().when().body(positionDto).contentType(MediaType.APPLICATION_JSON).post(
 				"tracks/vehicles/" + vehicleDto.getId() + "/positions").then().assertThat().statusCode(204);
 
-		given().when().queryParam("owner", owner).delete("tracks/vehicles/" + vehicleDto.getId()).then().assertThat().statusCode(204);
+		given().when().delete("tracks/vehicles/" + vehicleDto.getId()).then().assertThat().statusCode(204);
 
-		given().when().get("tracks/vehicles/"+vehicleDto.getId()+"/positions/last").then().assertThat().statusCode(404);
+		given().when().get("tracks/vehicles/" + vehicleDto.getId() + "/positions/last").then().assertThat().statusCode(404);
 
 	}
 

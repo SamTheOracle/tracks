@@ -1,5 +1,7 @@
 package com.oracolo.findmycar.dao;
 
+import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -35,5 +37,15 @@ public class PositionDao extends BaseDao<Position> {
 		Predicate vehicleIdPredicate = cb.equal(root.get("vehicle"),vehicleId);
 		criteriaDelete.where(cb.and(vehicleIdPredicate,userPredicate));
 		em.createQuery(criteriaDelete).executeUpdate();
+	}
+
+	public List<Position> getAllPositions(String owner, Integer vehicleId) {
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Position> criteriaQuery = cb.createQuery(Position.class);
+		Root<Position> root = criteriaQuery.from(Position.class);
+		Predicate userPredicate = cb.equal(root.get("userId"),owner);
+		Predicate vehicleIdPredicate = cb.equal(root.get("vehicle"),vehicleId);
+		TypedQuery<Position> typedQuery = em.createQuery(criteriaQuery.where(cb.and(vehicleIdPredicate,userPredicate)));
+		return typedQuery.getResultList();
 	}
 }

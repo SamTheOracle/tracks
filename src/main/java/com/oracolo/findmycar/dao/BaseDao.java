@@ -1,6 +1,7 @@
 package com.oracolo.findmycar.dao;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -28,6 +29,10 @@ public class BaseDao<T> {
 	public void delete(T entity) {
 		em.remove(entity);
 	}
+	public void delete(Collection<T> entities) {
+		entities.forEach(this::delete);
+	}
+
 
 	public void update(T entity){
 		if(entity instanceof MetadataEnable){
@@ -35,6 +40,9 @@ public class BaseDao<T> {
 			metadata.setLastUpdate(LocalDateTime.now());
 		}
 		em.merge(entity);
+	}
+	public void update(Collection<T> entities){
+		entities.forEach(this::update);
 	}
 
 }
