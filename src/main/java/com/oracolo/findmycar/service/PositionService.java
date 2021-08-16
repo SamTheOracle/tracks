@@ -1,5 +1,7 @@
 package com.oracolo.findmycar.service;
 
+import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -36,6 +38,8 @@ public class PositionService {
 	}
 
 	public void deleteAllPositions(String owner, Integer vehicleId) {
-		positionDao.deleteAllPositionsByOwnerAndVehicleId(owner,vehicleId);
+		List<Position> positions = positionDao.getAllPositions(owner, vehicleId);
+		if (!positions.isEmpty())
+			positionDao.delete(positions);
 	}
 }

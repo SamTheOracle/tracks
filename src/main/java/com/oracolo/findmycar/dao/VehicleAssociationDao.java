@@ -66,4 +66,5 @@ public class VehicleAssociationDao extends BaseDao<VehicleAssociation> {
 		vehicleCriteriaQuery.where(vehicleIdPredicate);
 		return em.createQuery(vehicleCriteriaQuery).getResultList();
 	}
+
 }

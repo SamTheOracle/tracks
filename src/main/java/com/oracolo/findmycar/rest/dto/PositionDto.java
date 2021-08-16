@@ -14,7 +14,6 @@ public class PositionDto {
 	public String timestamp;
 	@NotNull
 	public String timezone;
-	@NotNull
 	public String userId;
 	@NotNull
 	public Long chatId;
