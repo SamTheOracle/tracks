@@ -9,6 +9,7 @@ import javax.ws.rs.NotFoundException;
 
 import com.oracolo.findmycar.dao.PositionDao;
 import com.oracolo.findmycar.entities.Position;
+import com.oracolo.findmycar.entities.Vehicle;
 import com.oracolo.findmycar.mqtt.converter.PositionMessageConverter;
 import com.oracolo.findmycar.mqtt.enums.PersistenceAction;
 
@@ -32,12 +33,13 @@ public class PositionService {
 		mqttClientService.sendPositionMessage(positionMessageConverter.from(position, PersistenceAction.CREATE));
 	}
 
-	public Position getLastPositionByVehicleId(Integer vehicleId) {
-		return positionDao.getLastPosition(vehicleId).orElseThrow(
-				() -> new NotFoundException("No position found for vehicle with id " + vehicleId));
+	public Position getLastPositionByVehicleId(Vehicle vehicle) {
+		return positionDao.getLastPosition(vehicle).orElseThrow(
+				() -> new NotFoundException("No position found for vehicle with id " + vehicle));
 	}
 
-	public void deleteAllPositions(String owner, Integer vehicleId) {
+	@Transactional
+	public void deleteAllPositions(String owner, Vehicle vehicleId) {
 		List<Position> positions = positionDao.getAllPositions(owner, vehicleId);
 		if (!positions.isEmpty())
 			positionDao.delete(positions);

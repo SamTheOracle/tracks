@@ -73,11 +73,11 @@ public class VehicleService {
 			vehicleEntity.setVehicleName(newVehicleName);
 		}
 		if (isFavorite != null) {
-			vehicleAssociationService.updateIsFavorite(vehicleId, loggedUserId, isFavorite);
+			vehicleAssociationService.updateIsFavorite(vehicleEntity, loggedUserId, isFavorite);
 		}
 		vehicleDao.update(vehicleEntity);
 		mqttClientService.sendVehicleMessage(vehicleMessageConverter.from(
-				vehicleAssociationService.getVehicleAssociationByUserAndVehicleId(loggedUserId, vehicleId).orElseThrow(
+				vehicleAssociationService.getVehicleAssociationByUserAndVehicleId(loggedUserId, vehicleEntity).orElseThrow(
 						() -> new NotFoundException("Association not found")), PersistenceAction.UPDATE));
 	}
 
@@ -87,24 +87,23 @@ public class VehicleService {
 			throw new NotFoundException("Vehicle not found for id " + vehicleId);
 		}
 		Vehicle vehicle = vehicleOptional.get();
-		return vehicleAssociationService.getVehicleAssociationByUserAndVehicleId(vehicle.getOwner(), vehicleId);
+		return vehicleAssociationService.getVehicleAssociationByUserAndVehicleId(vehicle.getOwner(), vehicle);
 	}
 
 	/**
 	 * Only owner can remove vehicle
 	 */
 	@Transactional
-	public void deleteVehicle(String user, Integer vehicleId) {
+	public void deleteVehicle(String user, Vehicle vehicle) {
 
-		List<VehicleAssociation> associations = vehicleAssociationService.getVehicleAssociationsById(vehicleId);
+		List<VehicleAssociation> associations = vehicleAssociationService.getVehicleAssociationsById(vehicle);
 		if (associations.isEmpty()) {
-			throw new ForbiddenException("There is no association with vehicle " + vehicleId + " for owner " + user);
+			throw new ForbiddenException("There is no association with vehicle " + vehicle + " for owner " + user);
 		}
 		vehicleAssociationService.deleteAssociations(associations);
 
-		logger.debug("Deleting positions that match userId {} and vehicleId {}", user, vehicleId);
-		positionService.deleteAllPositions(user, vehicleId);
-		Vehicle vehicle = vehicleDao.getVehicleById(vehicleId).orElseThrow();
+		logger.debug("Deleting positions that match userId {} and vehicleId {}", user, vehicle);
+		positionService.deleteAllPositions(user, vehicle);
 		vehicleDao.delete(vehicle);
 		mqttClientService.sendVehicleMessage(vehicleMessageConverter.from(associations.get(0), PersistenceAction.DELETE));
 

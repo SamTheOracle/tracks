@@ -5,7 +5,6 @@ import java.util.List;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
@@ -17,7 +16,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.slf4j.Logger;
@@ -25,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.oracolo.findmycar.BaseRest;
 import com.oracolo.findmycar.Role;
+import com.oracolo.findmycar.entities.Vehicle;
 import com.oracolo.findmycar.rest.converter.PositionConverter;
 import com.oracolo.findmycar.rest.converter.VehicleAssociationConverter;
 import com.oracolo.findmycar.rest.converter.VehicleConverter;
@@ -81,21 +80,19 @@ public class VehicleRest extends BaseRest {
 	@Inject
 	VehicleAssociationConverter vehicleAssociationConverter;
 
-
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void createNewVehicle(@NotNull NewVehicleDto vehicleDto) {
 		newVehicleValidator.validate(vehicleDto);
 		String loggedUserId = getLoggedUserId();
-		vehicleService.createVehicle(vehicleConverter.from(vehicleDto,loggedUserId), vehicleDto.isFavorite);
+		vehicleService.createVehicle(vehicleConverter.from(vehicleDto, loggedUserId), vehicleDto.isFavorite);
 	}
 
 	@GET
 	@Path("{vehicleId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public VehicleDto getVehicles(@PathParam("vehicleId") Integer vehicleId) {
-		return vehicleConverter.to(
-				vehicleService.getVehicleAssociationByVehicleId(vehicleId).orElseThrow(NotFoundException::new));
+		return vehicleConverter.to(vehicleService.getVehicleAssociationByVehicleId(vehicleId).orElseThrow(NotFoundException::new));
 	}
 
 	@GET
@@ -112,7 +109,7 @@ public class VehicleRest extends BaseRest {
 
 		updateVehicleValidator.validate(updateVehicleDto);
 		updateVehicleValidator.validateUpdateForGivenPathId(vehicleId, updateVehicleDto);
-		vehicleService.updateVehicle(vehicleId,updateVehicleDto.vehicleName,updateVehicleDto.isFavorite,getLoggedUserId());
+		vehicleService.updateVehicle(vehicleId, updateVehicleDto.vehicleName, updateVehicleDto.isFavorite, getLoggedUserId());
 	}
 
 	@DELETE
@@ -120,7 +117,7 @@ public class VehicleRest extends BaseRest {
 	public void deleteVehicle(@NotNull @PathParam("vehicleId") Integer vehicleId) {
 		queryVehicleValidator.validate(vehicleId);
 
-		vehicleService.deleteVehicle(getLoggedUserId(), vehicleId);
+		vehicleService.deleteVehicle(getLoggedUserId(),vehicleService.getVehicleById(vehicleId).orElseThrow(()->new NotFoundException("Vehicle not found")));
 
 	}
 
@@ -129,14 +126,15 @@ public class VehicleRest extends BaseRest {
 	@Consumes(value = MediaType.APPLICATION_JSON)
 	public void createPosition(PositionDto positionDto, @PathParam("vehicleId") Integer vehicleId) {
 		positionValidator.validate(positionDto);
-		positionService.createNewPosition(positionConverter.from(positionDto, vehicleId,getLoggedUserId()));
+		positionService.createNewPosition(positionConverter.from(positionDto, vehicleId, getLoggedUserId()));
 	}
 
 	@GET
 	@Path("{vehicleId}/positions/last")
 	@Produces(value = MediaType.APPLICATION_JSON)
 	public PositionDto getLastPositionForVehicle(@PathParam("vehicleId") Integer vehicleId) {
-		return positionConverter.to(positionService.getLastPositionByVehicleId(vehicleId));
+		return positionConverter.to(positionService.getLastPositionByVehicleId(
+				vehicleService.getVehicleById(vehicleId).orElseThrow(() -> new NotFoundException("Vehicle not found"))));
 	}
 
 	@POST

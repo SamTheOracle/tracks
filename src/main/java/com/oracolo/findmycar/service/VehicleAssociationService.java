@@ -11,6 +11,7 @@ import javax.swing.text.html.Option;
 import javax.transaction.Transactional;
 
 import com.oracolo.findmycar.dao.VehicleAssociationDao;
+import com.oracolo.findmycar.entities.Vehicle;
 import com.oracolo.findmycar.entities.VehicleAssociation;
 
 @ApplicationScoped
@@ -27,8 +28,8 @@ public class VehicleAssociationService {
 		vehicleAssociationDao.insert(vehicleAssociation);
 	}
 
-	public List<VehicleAssociation> getVehicleAssociationsById(Integer vehicleId) {
-		return vehicleAssociationDao.getVehicleAssociationsById(vehicleId);
+	public List<VehicleAssociation> getVehicleAssociationsById(Vehicle vehicle) {
+		return vehicleAssociationDao.getVehicleAssociationsById(vehicle);
 	}
 
 	public List<VehicleAssociation> getVehicleAssociationByOwner(String owner) {
@@ -40,28 +41,13 @@ public class VehicleAssociationService {
 		vehicleAssociationDao.setAllVehicleAssociationsFavoriteToFalse(user);
 	}
 
-	public Optional<VehicleAssociation> getVehicleAssociationByUserAndVehicleId(String owner, Integer id) {
-		return vehicleAssociationDao.getVehicleAssociationsByUserIdAndVehicleId(owner, id);
+	public Optional<VehicleAssociation> getVehicleAssociationByUserAndVehicleId(String owner, Vehicle vehicle) {
+		return vehicleAssociationDao.getVehicleAssociationsByUserIdAndVehicleId(owner, vehicle);
 	}
 
 	@Transactional
-	public void updateVehicleAssociation(VehicleAssociation vehicleAssociationEntity) {
-		vehicleAssociationDao.update(vehicleAssociationEntity);
-	}
-
-	@Transactional
-	public void setAllUserVehicleAssociationsAsNotFavoriteExceptVehicleId(String user, Integer vehicleIdToExclude) {
-		vehicleAssociationDao.setAllVehicleAssociationsFavoriteToFalse(user, vehicleIdToExclude);
-	}
-
-	@Transactional
-	public void deleteAssociation(VehicleAssociation association) {
-		vehicleAssociationDao.delete(association);
-	}
-
-	@Transactional
-	public void updateIsFavorite(Integer vehicleId, String user, Boolean isFavorite) {
-		Optional<VehicleAssociation> associationOptional = vehicleAssociationDao.getVehicleAssociationsByUserIdAndVehicleId(user,vehicleId);
+	public void updateIsFavorite(Vehicle vehicle, String user, Boolean isFavorite) {
+		Optional<VehicleAssociation> associationOptional = vehicleAssociationDao.getVehicleAssociationsByUserIdAndVehicleId(user,vehicle);
 		associationOptional.ifPresent(association->association.setFavorite(isFavorite));
 		if(isFavorite){
 			Optional<VehicleAssociation> vehicleAssociationToUpdate = vehicleAssociationDao.getVehicleAssociationsByOwnerId(user).stream().filter(
