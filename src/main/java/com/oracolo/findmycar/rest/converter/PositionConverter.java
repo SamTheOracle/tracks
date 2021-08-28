@@ -5,9 +5,11 @@ import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
 
 import com.oracolo.findmycar.entities.Position;
+import com.oracolo.findmycar.entities.Vehicle;
 import com.oracolo.findmycar.entities.VehicleAssociation;
 import com.oracolo.findmycar.rest.dto.PositionDto;
 import com.oracolo.findmycar.service.VehicleAssociationService;
+import com.oracolo.findmycar.service.VehicleService;
 
 @ApplicationScoped
 public class PositionConverter {
@@ -15,7 +17,7 @@ public class PositionConverter {
 	@Inject
 	VehicleAssociationService vehicleAssociationService;
 
-	public Position from(PositionDto positionDto, Integer vehicleId, String loggedUserId) {
+	public Position from(PositionDto positionDto, Vehicle vehicle, String loggedUserId) {
 		Position position = new Position();
 		position.setChatId(positionDto.chatId);
 		position.setLatitude(positionDto.latitude);
@@ -23,9 +25,9 @@ public class PositionConverter {
 		position.setUserId(loggedUserId);
 		position.setTimezone(positionDto.timezone);
 		position.setTimeStamp(positionDto.timestamp);
-		position.setVehicle(vehicleAssociationService.getVehicleAssociationByUserAndVehicleId(loggedUserId, vehicleId).map(
+		position.setVehicle(vehicleAssociationService.getVehicleAssociationByUserAndVehicle(loggedUserId, vehicle).map(
 				VehicleAssociation::getVehicle).orElseThrow(
-				() -> new ForbiddenException("User with id " + loggedUserId + " has no association on vehicle " + vehicleId)));
+				() -> new ForbiddenException("User with id " + loggedUserId + " has no association on vehicle " + vehicle)));
 		return position;
 	}
 

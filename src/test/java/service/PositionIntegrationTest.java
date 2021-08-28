@@ -142,10 +142,6 @@ class PositionIntegrationTest extends BaseVehicleTest {
 				"user");
 		given().when().with().body(positionDto5).contentType(MediaType.APPLICATION_JSON).post(
 				"tracks/vehicles/101289709/positions").then().assertThat().statusCode(HttpResponseStatus.FORBIDDEN.code());
-		PositionDto positionDto6 = createDto(123L, ZonedDateTime.now(ZoneId.of("Europe/Rome")).toString(), "Europe/Rome", "latitude",
-				"longitude", null);
-		given().when().with().body(positionDto6).contentType(MediaType.APPLICATION_JSON).post(
-				"tracks/vehicles/101289709/positions").then().assertThat().statusCode(HttpResponseStatus.FORBIDDEN.code());
 
 	}
 

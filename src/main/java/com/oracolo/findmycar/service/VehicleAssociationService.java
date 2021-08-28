@@ -2,12 +2,9 @@ package com.oracolo.findmycar.service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.swing.text.html.Option;
 import javax.transaction.Transactional;
 
 import com.oracolo.findmycar.dao.VehicleAssociationDao;
@@ -41,7 +38,7 @@ public class VehicleAssociationService {
 		vehicleAssociationDao.setAllVehicleAssociationsFavoriteToFalse(user);
 	}
 
-	public Optional<VehicleAssociation> getVehicleAssociationByUserAndVehicleId(String owner, Vehicle vehicle) {
+	public Optional<VehicleAssociation> getVehicleAssociationByUserAndVehicle(String owner, Vehicle vehicle) {
 		return vehicleAssociationDao.getVehicleAssociationsByUserIdAndVehicleId(owner, vehicle);
 	}
 
@@ -58,5 +55,15 @@ public class VehicleAssociationService {
 
 	public void deleteAssociations(List<VehicleAssociation> associations) {
 		vehicleAssociationDao.delete(associations);
+	}
+
+	/**
+	 * User id defaults to vehicle owner
+	 * @param vehicle
+	 * @return
+	 */
+	public Optional<VehicleAssociation> getVehicleAssociationByVehicle(Vehicle vehicle) {
+
+		return getVehicleAssociationByUserAndVehicle(vehicle.getOwner(),vehicle);
 	}
 }

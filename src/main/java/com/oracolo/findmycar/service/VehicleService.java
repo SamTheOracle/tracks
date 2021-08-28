@@ -77,18 +77,11 @@ public class VehicleService {
 		}
 		vehicleDao.update(vehicleEntity);
 		mqttClientService.sendVehicleMessage(vehicleMessageConverter.from(
-				vehicleAssociationService.getVehicleAssociationByUserAndVehicleId(loggedUserId, vehicleEntity).orElseThrow(
+				vehicleAssociationService.getVehicleAssociationByUserAndVehicle(loggedUserId, vehicleEntity).orElseThrow(
 						() -> new NotFoundException("Association not found")), PersistenceAction.UPDATE));
 	}
 
-	public Optional<VehicleAssociation> getVehicleAssociationByVehicleId(Integer vehicleId) {
-		Optional<Vehicle> vehicleOptional = vehicleDao.getVehicleById(vehicleId);
-		if (vehicleOptional.isEmpty()) {
-			throw new NotFoundException("Vehicle not found for id " + vehicleId);
-		}
-		Vehicle vehicle = vehicleOptional.get();
-		return vehicleAssociationService.getVehicleAssociationByUserAndVehicleId(vehicle.getOwner(), vehicle);
-	}
+
 
 	/**
 	 * Only owner can remove vehicle
